@@ -5,11 +5,12 @@ import { Clicker } from './components/Clicker';
 import { MiniGames } from './components/MiniGames';
 import { Game2048 } from './components/Game2048';
 import { Snake } from './components/Snake';
+import { FlappyBird } from './components/FlappyBird';
 import { Layout } from './components/Layout';
 import { FloatingEmojis } from './components/FloatingEmojis';
 import './styles/App.css';
 
-type Screen = 'clicker' | 'games' | 'game2048' | 'snake';
+type Screen = 'clicker' | 'games' | 'game2048' | 'snake' | 'flappybird';
 
 // Вспомогательная функция для безопасного показа алертов
 const showAlert = (message: string) => {
@@ -66,6 +67,11 @@ function App() {
 				buttonText = '🔙 К играм';
 				onButtonClick = () => setCurrentScreen('games');
 				break;
+			case 'flappybird':
+				title = 'Flappy Bird';
+				buttonText = '🔙 К играм';
+				onButtonClick = () => setCurrentScreen('games');
+				break;
 			default:
 				title = 'Кликер';
 				buttonText = '🎮 Играть';
@@ -95,6 +101,7 @@ function App() {
 							onScoreChange={handleScoreChange}
 							onGame2048Select={() => setCurrentScreen('game2048')}
 							onSnakeSelect={() => setCurrentScreen('snake')}
+							onFlappyBirdSelect={() => setCurrentScreen('flappybird')}
 						/>
 					</div>
 				);
@@ -121,6 +128,19 @@ function App() {
 						<Snake
 							onGameOver={(gameScore) => {
 								const reward = gameScore * 2;
+								handleScoreChange(score + reward);
+								showAlert(`Игра окончена!\nВы получаете ${reward} монет!`);
+							}}
+							onBack={() => setCurrentScreen('games')}
+						/>
+					</div>
+				);
+			case 'flappybird':
+				return (
+					<div className="flappybird-screen">
+						<FlappyBird
+							onGameOver={(gameScore) => {
+								const reward = gameScore * 5;
 								handleScoreChange(score + reward);
 								showAlert(`Игра окончена!\nВы получаете ${reward} монет!`);
 							}}
