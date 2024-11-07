@@ -4,9 +4,10 @@ import '../styles/Game2048.css';
 interface Game2048Props {
 	onWin?: (score: number) => void;
 	onGameOver?: (score: number) => void;
+	onBack: () => void;
 }
 
-export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver }) => {
+export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack }) => {
 	const [board, setBoard] = useState<number[][]>([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]);
 	const [score, setScore] = useState(0);
 	const [gameOver, setGameOver] = useState(false);
@@ -196,6 +197,9 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver }) => {
 	return (
 		<div className="game-2048">
 			<div className="game-header">
+				<button className="back-button" onClick={onBack}>
+					← Назад
+				</button>
 				<div className="score-container">
 					<div className="score-label">Счёт</div>
 					<div className="score-value">{score}</div>

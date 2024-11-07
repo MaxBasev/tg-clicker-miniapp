@@ -6,9 +6,10 @@ interface MiniGameProps {
 	score: number;
 	onScoreChange: (newScore: number) => void;
 	onGame2048Select: () => void;
+	onSnakeSelect: () => void;
 }
 
-export const MiniGames: React.FC<MiniGameProps> = ({ score, onScoreChange, onGame2048Select }) => {
+export const MiniGames: React.FC<MiniGameProps> = ({ score, onScoreChange, onGame2048Select, onSnakeSelect }) => {
 	const [gameResult, setGameResult] = useState<string | null>(null);
 	const [isPlaying, setIsPlaying] = useState(false);
 
@@ -37,6 +38,15 @@ export const MiniGames: React.FC<MiniGameProps> = ({ score, onScoreChange, onGam
 			icon: '🧩',
 			description: 'Классическая головоломка',
 			customAction: onGame2048Select
+		},
+		{
+			id: 'snake',
+			name: 'Змейка',
+			price: 0,
+			reward: 0,
+			icon: '🐍',
+			description: 'Классическая змейка',
+			customAction: onSnakeSelect
 		}
 	];
 

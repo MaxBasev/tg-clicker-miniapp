@@ -4,11 +4,21 @@ import { MainButton } from '@vkruglikov/react-telegram-web-app';
 import { Clicker } from './components/Clicker';
 import { MiniGames } from './components/MiniGames';
 import { Game2048 } from './components/Game2048';
+import { Snake } from './components/Snake';
 import { Layout } from './components/Layout';
 import { FloatingEmojis } from './components/FloatingEmojis';
 import './styles/App.css';
 
-type Screen = 'clicker' | 'games' | 'game2048';
+type Screen = 'clicker' | 'games' | 'game2048' | 'snake';
+
+// Вспомогательная функция для безопасного показа алертов
+const showAlert = (message: string) => {
+	try {
+		WebApp.showAlert(message);
+	} catch (e) {
+		console.log('Alert message (development):', message);
+	}
+};
 
 function App() {
 	const [currentScreen, setCurrentScreen] = useState<Screen>('clicker');
@@ -18,8 +28,12 @@ function App() {
 	});
 
 	useEffect(() => {
-		WebApp.ready();
-		WebApp.setHeaderColor('secondary_bg_color');
+		try {
+			WebApp.ready();
+			WebApp.setHeaderColor('secondary_bg_color');
+		} catch (e) {
+			console.log('WebApp not available in development');
+		}
 	}, []);
 
 	const handleScoreChange = (newScore: number) => {
@@ -28,7 +42,7 @@ function App() {
 	};
 
 	const handleDonateClick = () => {
-		WebApp.showAlert('Спасибо за желание поддержать! 🙏\nК сожалению, сейчас это невозможно 😅');
+		showAlert('Спасибо за желание поддержать! 🙏\nК сожалению, сейчас это невозможно 😅');
 	};
 
 	const renderHeader = () => {
@@ -44,6 +58,11 @@ function App() {
 				break;
 			case 'game2048':
 				title = '2048';
+				buttonText = '🔙 К играм';
+				onButtonClick = () => setCurrentScreen('games');
+				break;
+			case 'snake':
+				title = 'Змейка';
 				buttonText = '🔙 К играм';
 				onButtonClick = () => setCurrentScreen('games');
 				break;
@@ -75,6 +94,7 @@ function App() {
 							score={score}
 							onScoreChange={handleScoreChange}
 							onGame2048Select={() => setCurrentScreen('game2048')}
+							onSnakeSelect={() => setCurrentScreen('snake')}
 						/>
 					</div>
 				);
@@ -84,13 +104,27 @@ function App() {
 						<Game2048
 							onWin={(gameScore) => {
 								handleScoreChange(score + gameScore);
-								WebApp.showAlert(`🎉 Поздравляем! Вы собрали 2048!\nНаграда: ${gameScore} монет!`);
+								showAlert(`🎉 Поздравляем! Вы собрали 2048!\nНаграда: ${gameScore} монет!`);
 							}}
 							onGameOver={(gameScore) => {
 								const reward = Math.floor(gameScore / 10);
 								handleScoreChange(score + reward);
-								WebApp.showAlert(`Игра окончена!\nВы получаете ${reward} монет!`);
+								showAlert(`Игра окончена!\nВы получаете ${reward} монет!`);
 							}}
+							onBack={() => setCurrentScreen('games')}
+						/>
+					</div>
+				);
+			case 'snake':
+				return (
+					<div className="snake-screen">
+						<Snake
+							onGameOver={(gameScore) => {
+								const reward = gameScore * 2;
+								handleScoreChange(score + reward);
+								showAlert(`Игра окончена!\nВы получаете ${reward} монет!`);
+							}}
+							onBack={() => setCurrentScreen('games')}
 						/>
 					</div>
 				);

@@ -1,0 +1,137 @@
+.snake-game {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.score {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--tg-theme-text-color);
+}
+
+.control-button {
+  background: var(--tg-theme-button-color);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.control-button:active {
+  transform: scale(0.95);
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 1px;
+  background: var(--tg-theme-secondary-bg-color);
+  padding: 10px;
+  border-radius: 8px;
+  aspect-ratio: 1;
+}
+
+.cell {
+  aspect-ratio: 1;
+  background: var(--tg-theme-bg-color);
+  border-radius: 2px;
+  transition: all 0.1s ease;
+}
+
+.cell.snake {
+  background: #4CAF50;
+  border-radius: 4px;
+  transform: scale(0.9);
+}
+
+.cell.head {
+  background: #2E7D32;
+  transform: scale(0.95);
+}
+
+.cell.food {
+  background: #F44336;
+  border-radius: 50%;
+  transform: scale(0.8);
+  animation: pulse 1s infinite;
+}
+
+.game-over {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.game-over-content {
+  background: var(--tg-theme-bg-color);
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.game-over-content h2 {
+  margin: 0 0 20px;
+  color: var(--tg-theme-text-color);
+}
+
+.game-over-content button {
+  background: var(--tg-theme-button-color);
+  color: var(--tg-theme-button-text-color);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(0.8); }
+}
+
+.back-button {
+  background: var(--tg-theme-button-color);
+  color: var(--tg-theme-button-text-color);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.back-button:hover {
+  opacity: 0.9;
+}
+
+.back-button:active {
+  transform: scale(0.95);
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+} 
