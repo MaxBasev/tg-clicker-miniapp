@@ -1,47 +1,32 @@
 {
-	"name": "client",
-	"version": "0.1.0",
-	"private": true,
-	"dependencies": {
-		"@testing-library/jest-dom": "^5.17.0",
-		"@testing-library/react": "^13.4.0",
-		"@testing-library/user-event": "^13.5.0",
-		"@twa-dev/sdk": "^7.10.1",
-		"@types/jest": "^27.5.2",
-		"@types/node": "^16.18.119",
-		"@types/react": "^18.3.12",
-		"@types/react-dom": "^18.3.1",
-		"@types/react-transition-group": "^4.4.11",
-		"@vkruglikov/react-telegram-web-app": "^2.1.9",
-		"react": "^18.3.1",
-		"react-dom": "^18.3.1",
-		"react-scripts": "5.0.1",
-		"react-transition-group": "^4.4.5",
-		"typescript": "^4.9.5",
-		"web-vitals": "^2.1.4"
-	},
+	"name": "tg-miniapp",
+	"version": "1.0.0",
+	"main": "index.js",
 	"scripts": {
-		"start": "react-scripts start",
-		"build": "react-scripts build",
-		"test": "react-scripts test",
-		"eject": "react-scripts eject"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "nodemon --exec ts-node src/index.ts",
+		"build": "tsc",
+		"start": "node dist/index.js"
 	},
-	"eslintConfig": {
-		"extends": [
-			"react-app",
-			"react-app/jest"
-		]
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"dependencies": {
+		"@twa-dev/sdk": "^7.10.1",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"express": "^4.21.1",
+		"mongodb": "^6.10.0",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1"
 	},
-	"browserslist": {
-		"production": [
-			">0.2%",
-			"not dead",
-			"not op_mini all"
-		],
-		"development": [
-			"last 1 chrome version",
-			"last 1 firefox version",
-			"last 1 safari version"
-		]
+	"devDependencies": {
+		"@types/cors": "^2.8.17",
+		"@types/express": "^5.0.0",
+		"@types/node": "^22.9.0",
+		"nodemon": "^3.1.7",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.6.3"
 	}
 }
