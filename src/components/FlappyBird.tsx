@@ -21,8 +21,6 @@ interface Pipe {
 const GRAVITY = 0.6;
 const JUMP_FORCE = -10;
 const PIPE_SPEED = 2;
-const PIPE_WIDTH = 60;
-const PIPE_GAP = 180;
 const BIRD_SIZE = 35;
 const GAME_HEIGHT = 400;
 const GAME_WIDTH = 300;
@@ -380,7 +378,7 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 				cancelAnimationFrame(gameLoopRef.current);
 			}
 		};
-	}, [gameStarted, gameOver, bird, pipes]);
+	}, [gameStarted, gameOver, bird, pipes, updateGame, drawGame, score, highScore, onGameOver]);
 
 	return (
 		<div className="flappy-bird">

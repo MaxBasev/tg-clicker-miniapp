@@ -30,14 +30,20 @@ export const Snake: React.FC<SnakeProps> = ({ onGameOver, onBack }) => {
 	const gameLoopRef = useRef<number>();
 
 	const generateFood = () => {
-		let newFood: Position;
+		let foodPosition: Position;
+		let isValidPosition: boolean;
+
 		do {
-			newFood = {
+			foodPosition = {
 				x: Math.floor(Math.random() * GRID_SIZE),
 				y: Math.floor(Math.random() * GRID_SIZE)
 			};
-		} while (snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
-		setFood(newFood);
+			isValidPosition = !snake.some(segment =>
+				segment.x === foodPosition.x && segment.y === foodPosition.y
+			);
+		} while (!isValidPosition);
+
+		setFood(foodPosition);
 	};
 
 	const resetGame = () => {
@@ -174,11 +180,13 @@ export const Snake: React.FC<SnakeProps> = ({ onGameOver, onBack }) => {
 	};
 
 	useEffect(() => {
+		if (isGameOver || isPaused) return;
+
 		gameLoopRef.current = window.setInterval(moveSnake, GAME_SPEED);
 		return () => {
 			if (gameLoopRef.current) clearInterval(gameLoopRef.current);
 		};
-	}, [isGameOver, isPaused]);
+	}, [isGameOver, isPaused, moveSnake]);
 
 	return (
 		<div

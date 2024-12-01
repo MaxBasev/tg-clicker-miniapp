@@ -151,7 +151,7 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
-	}, [board, gameOver]);
+	}, [gameOver, move]);
 
 	const handleTouchStart = (e: React.TouchEvent) => {
 		const touch = e.touches[0];
