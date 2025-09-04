@@ -1,5 +1,3 @@
-[Telegram Link](https://t.me/test_miniappsss_bot)
-
 # Telegram Mini Games App 🎮
 
 A collection of classic games reimagined as a Telegram Mini App. This is my experimental project created for fun and learning purposes.
