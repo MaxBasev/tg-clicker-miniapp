@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import WebApp from '@twa-dev/sdk';
-import { MainButton } from '@vkruglikov/react-telegram-web-app';
-import { Clicker } from './components/Clicker';
 import { MiniGames } from './components/MiniGames';
 import { Game2048 } from './components/Game2048';
 import { Snake } from './components/Snake';
@@ -10,7 +8,7 @@ import { Layout } from './components/Layout';
 import { FloatingEmojis } from './components/FloatingEmojis';
 import './styles/App.css';
 
-type Screen = 'clicker' | 'games' | 'game2048' | 'snake' | 'flappybird';
+type Screen = 'games' | 'game2048' | 'snake' | 'flappybird';
 
 // Вспомогательная функция для безопасного показа алертов
 const showAlert = (message: string) => {
@@ -22,7 +20,7 @@ const showAlert = (message: string) => {
 };
 
 function App() {
-	const [currentScreen, setCurrentScreen] = useState<Screen>('clicker');
+    const [currentScreen, setCurrentScreen] = useState<Screen>('games');
 	const [score, setScore] = useState(() => {
 		const saved = localStorage.getItem('score');
 		return saved ? parseInt(saved) : 0;
@@ -37,25 +35,32 @@ function App() {
 		}
 	}, []);
 
+	// Update document title based on current screen
+	useEffect(() => {
+		const titles: Record<Screen, string> = {
+			games: 'Procent Mini Games • Telegram',
+			game2048: '2048 • Mini Games',
+			snake: 'Snake • Mini Games',
+			flappybird: 'Flappy Rocket • Mini Games'
+		};
+		document.title = titles[currentScreen];
+	}, [currentScreen]);
+
 	const handleScoreChange = (newScore: number) => {
 		setScore(newScore);
 		localStorage.setItem('score', newScore.toString());
 	};
 
-	const handleDonateClick = () => {
-		showAlert('Спасибо за желание поддержать! 🙏\nК сожалению, сейчас это невозможно 😅');
-	};
-
 	const renderHeader = () => {
 		let title: string;
-		let buttonText: string;
-		let onButtonClick: () => void;
+        let buttonText: string | null = null;
+        let onButtonClick: (() => void) | null = null;
 
 		switch (currentScreen) {
 			case 'games':
-				title = 'Мини-игры';
-				buttonText = '🔙 Назад';
-				onButtonClick = () => setCurrentScreen('clicker');
+				title = 'Procent Mini Games';
+                buttonText = null; // no back button on games screen
+                onButtonClick = null;
 				break;
 			case 'game2048':
 				title = '2048';
@@ -72,21 +77,19 @@ function App() {
 				buttonText = '🔙 К играм';
 				onButtonClick = () => setCurrentScreen('games');
 				break;
-			default:
-				title = 'Кликер';
-				buttonText = '🎮 Играть';
-				onButtonClick = () => setCurrentScreen('games');
 		}
 
 		return (
 			<div className="header">
 				<h1>{title}</h1>
-				<button
-					className="screen-toggle"
-					onClick={onButtonClick}
-				>
-					{buttonText}
-				</button>
+                {buttonText && onButtonClick && (
+                    <button
+                        className="screen-toggle"
+                        onClick={onButtonClick}
+                    >
+                        {buttonText}
+                    </button>
+                )}
 			</div>
 		);
 	};
@@ -148,22 +151,8 @@ function App() {
 						/>
 					</div>
 				);
-			default:
-				return (
-					<div className="main-screen">
-						<div className="clicker-section">
-							<Clicker score={score} onScoreChange={handleScoreChange} />
-						</div>
-						<div className="actions">
-							<MainButton
-								text="☕️ Кинуть донат разрабу на кофе ☕️"
-								onClick={handleDonateClick}
-								color="#FF6B6B"
-								textColor="#FFFFFF"
-							/>
-						</div>
-					</div>
-				);
+            default:
+                return null;
 		}
 	};
 

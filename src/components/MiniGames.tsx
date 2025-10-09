@@ -46,52 +46,6 @@ export const MiniGames: React.FC<MiniGameProps> = ({
 			description: 'Преодолей все препятствия',
 			action: onFlappyBirdSelect,
 			color: '#2196F3'
-		},
-		{
-			id: 'guess_number',
-			name: 'Угадай число',
-			price: 50,
-			reward: 100,
-			icon: '🎲',
-			description: 'Испытайте удачу!',
-			color: '#9C27B0',
-			action: () => {
-				if (score >= 50) {
-					const result = Math.random() >= 0.5;
-					if (result) {
-						onScoreChange(score - 50 + 100);
-						alert('Победа! +100 монет');
-					} else {
-						onScoreChange(score - 50);
-						alert('Поражение! Попробуйте еще раз');
-					}
-				} else {
-					alert('Недостаточно монет!');
-				}
-			}
-		},
-		{
-			id: 'coin_flip',
-			name: 'Орел или решка',
-			price: 25,
-			reward: 50,
-			icon: '🪙',
-			description: 'Подбросить монетку',
-			color: '#FFC107',
-			action: () => {
-				if (score >= 25) {
-					const result = Math.random() >= 0.5;
-					if (result) {
-						onScoreChange(score - 25 + 50);
-						alert('Победа! +50 монет');
-					} else {
-						onScoreChange(score - 25);
-						alert('Поражение! Попробуйте еще раз');
-					}
-				} else {
-					alert('Недостаточно монет!');
-				}
-			}
 		}
 	];
 
