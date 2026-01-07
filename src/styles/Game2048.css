@@ -3,6 +3,7 @@
   max-width: 500px;
   margin: 0 auto;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .game-header {
@@ -46,147 +47,133 @@
   transform: scale(0.95);
 }
 
-.game-board {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  background: var(--tg-theme-secondary-bg-color);
-  padding: 12px;
-  border-radius: 8px;
-  aspect-ratio: 1;
+/* Game Board Container - Holds the grid */
+.game-board-container {
   position: relative;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  /* CRITICAL for absolute tiles */
+  width: 100%;
+  /* aspect-ratio: 1; removed to avoid height issues on some browsers, height auto is better with grid? No, height should match width */
+  aspect-ratio: 1;
+  background: #bbada0;
+  border-radius: 6px;
+  padding: 10px;
+  margin: 0 auto;
   touch-action: none;
+  box-sizing: border-box;
 }
 
-/* Добавляем сетку */
-.game-board::before {
-  content: '';
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  background-image: 
-    linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
-  background-size: calc(25% - 3px) calc(25% - 3px);
-  pointer-events: none;
+/* Background Grid (Static) */
+.game-grid-background {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+.grid-cell {
+  width: 100%;
+  height: 100%;
+  background: rgba(238, 228, 218, 0.35);
+  border-radius: 3px;
 }
 
 .tile {
   background: var(--tg-theme-bg-color);
-  border-radius: 8px;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
   font-weight: bold;
   aspect-ratio: 1;
-  transition: all 0.15s ease;
-  position: relative;
+  /* transition: all 0.15s ease; removed in favor of framer-motion */
+  position: absolute;
+  /* Explicitly absolute */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   -webkit-tap-highlight-color: transparent;
+  z-index: 10;
 }
 
-.tile::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 8px;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
-  pointer-events: none;
+.tile-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.tile-0 {
-  background: rgba(238, 228, 218, 0.1);
-}
-
-.tile-2 { 
-  background: #eee4da; 
-  color: #776e65;
-  animation: tile-appear 0.2s ease;
-}
-
-.tile-4 { 
-  background: #ede0c8; 
+/* Tile Colors */
+.tile-2 {
+  background: #eee4da;
   color: #776e65;
 }
 
-.tile-8 { 
-  background: #f2b179; 
-  color: #f9f6f2;
-  box-shadow: 0 4px 12px rgba(242, 177, 121, 0.4);
+.tile-4 {
+  background: #ede0c8;
+  color: #776e65;
 }
 
-.tile-16 { 
-  background: #f59563; 
+.tile-8 {
+  background: #f2b179;
   color: #f9f6f2;
-  box-shadow: 0 4px 12px rgba(245, 149, 99, 0.4);
 }
 
-.tile-32 { 
-  background: #f67c5f; 
+.tile-16 {
+  background: #f59563;
   color: #f9f6f2;
-  box-shadow: 0 4px 12px rgba(246, 124, 95, 0.4);
 }
 
-.tile-64 { 
-  background: #f65e3b; 
+.tile-32 {
+  background: #f67c5f;
   color: #f9f6f2;
-  box-shadow: 0 4px 12px rgba(246, 94, 59, 0.4);
 }
 
-.tile-128 { 
-  background: #edcf72; 
-  color: #f9f6f2; 
+.tile-64 {
+  background: #f65e3b;
+  color: #f9f6f2;
+}
+
+.tile-128 {
+  background: #edcf72;
+  color: #f9f6f2;
   font-size: 20px;
-  box-shadow: 0 4px 12px rgba(237, 207, 114, 0.4);
 }
 
-.tile-256 { 
-  background: #edcc61; 
-  color: #f9f6f2; 
+.tile-256 {
+  background: #edcc61;
+  color: #f9f6f2;
   font-size: 20px;
-  box-shadow: 0 4px 12px rgba(237, 204, 97, 0.4);
 }
 
-.tile-512 { 
-  background: #edc850; 
-  color: #f9f6f2; 
+.tile-512 {
+  background: #edc850;
+  color: #f9f6f2;
   font-size: 20px;
-  box-shadow: 0 4px 12px rgba(237, 200, 80, 0.4);
 }
 
-.tile-1024 { 
-  background: #edc53f; 
-  color: #f9f6f2; 
+.tile-1024 {
+  background: #edc53f;
+  color: #f9f6f2;
   font-size: 18px;
-  box-shadow: 0 4px 12px rgba(237, 197, 63, 0.4);
 }
 
-.tile-2048 { 
-  background: #edc22e; 
-  color: #f9f6f2; 
+.tile-2048 {
+  background: #edc22e;
+  color: #f9f6f2;
   font-size: 18px;
-  box-shadow: 0 4px 12px rgba(237, 194, 46, 0.4);
 }
 
 @keyframes tile-appear {
   0% {
     transform: scale(0);
   }
+
   50% {
     transform: scale(1.1);
   }
+
   100% {
     transform: scale(1);
   }
@@ -243,6 +230,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -253,6 +241,7 @@
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -277,18 +266,31 @@
   animation: pulse 2s infinite;
 }
 
-.swipe-hints span:nth-child(1) { animation-delay: 0s; }
-.swipe-hints span:nth-child(2) { animation-delay: 0.5s; }
-.swipe-hints span:nth-child(3) { animation-delay: 1s; }
-.swipe-hints span:nth-child(4) { animation-delay: 1.5s; }
+.swipe-hints span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.swipe-hints span:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.swipe-hints span:nth-child(3) {
+  animation-delay: 1s;
+}
+
+.swipe-hints span:nth-child(4) {
+  animation-delay: 1.5s;
+}
 
 @keyframes pulse {
   0% {
     opacity: 0.3;
   }
+
   50% {
     opacity: 1;
   }
+
   100% {
     opacity: 0.3;
   }
