@@ -11,7 +11,6 @@ interface MiniGameProps {
 
 export const MiniGames: React.FC<MiniGameProps> = ({
 	score,
-	onScoreChange,
 	onGame2048Select,
 	onSnakeSelect,
 	onFlappyBirdSelect

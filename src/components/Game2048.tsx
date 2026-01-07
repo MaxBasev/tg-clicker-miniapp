@@ -17,19 +17,9 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 	const minSwipeDistance = 50; // Минимальное расстояние для свайпа
 
 	// Инициализация игры
-	useEffect(() => {
-		initGame();
-	}, []);
-
-	const initGame = () => {
-		const newBoard = Array(4).fill(0).map(() => Array(4).fill(0));
-		addNewTile(addNewTile(newBoard));
-		setBoard(newBoard);
-		setScore(0);
-		setGameOver(false);
-	};
-
-	const addNewTile = (currentBoard: number[][]) => {
+	// Инициализация игры
+	// Обернем addNewTile в useCallback чтобы использовать в initGame
+	const addNewTile = React.useCallback((currentBoard: number[][]) => {
 		const available = [];
 		for (let i = 0; i < 4; i++) {
 			for (let j = 0; j < 4; j++) {
@@ -43,9 +33,48 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 			currentBoard[randomCell.x][randomCell.y] = Math.random() < 0.9 ? 2 : 4;
 		}
 		return currentBoard;
-	};
+	}, []);
 
-	const moveLeft = (board: number[][]) => {
+	const initGame = React.useCallback(() => {
+		const newBoard = Array(4).fill(0).map(() => Array(4).fill(0));
+		addNewTile(addNewTile(newBoard));
+		setBoard(newBoard);
+		setScore(0);
+		setGameOver(false);
+	}, [addNewTile]);
+
+	// Инициализация игры
+	const initialized = useRef(false);
+
+	useEffect(() => {
+		if (!initialized.current) {
+			// eslint-disable-next-line
+			initGame();
+			initialized.current = true;
+		}
+	}, [initGame]);
+
+	const checkGameOver = React.useCallback((currentBoard: number[][]) => {
+		// Проверка на победу (плитка 2048)
+		if (currentBoard.some(row => row.some(cell => cell === 2048))) {
+			onWin?.(score);
+			return;
+		}
+
+		// Проверка на возможность хода
+		for (let i = 0; i < 4; i++) {
+			for (let j = 0; j < 4; j++) {
+				if (currentBoard[i][j] === 0) return;
+				if (i < 3 && currentBoard[i][j] === currentBoard[i + 1][j]) return;
+				if (j < 3 && currentBoard[i][j] === currentBoard[i][j + 1]) return;
+			}
+		}
+
+		setGameOver(true);
+		onGameOver?.(score);
+	}, [onWin, onGameOver, score]);
+
+	const moveLeft = React.useCallback((board: number[][]) => {
 		let newScore = score;
 		const newBoard = board.map(row => {
 			const line = row.filter(cell => cell !== 0);
@@ -61,8 +90,10 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 		});
 		setScore(newScore);
 		return newBoard;
-	};
+	}, [score]);
 
+	// Move rotate definition here or make it separate pure function outside if possible, 
+	// but for now keeping inside component is easiest to avoid large refactor
 	const rotate = (board: number[][]) => {
 		const newBoard = Array(4).fill(0).map(() => Array(4).fill(0));
 		for (let i = 0; i < 4; i++) {
@@ -73,7 +104,7 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 		return newBoard;
 	};
 
-	const move = (direction: 'left' | 'right' | 'up' | 'down') => {
+	const move = React.useCallback((direction: 'left' | 'right' | 'up' | 'down') => {
 		let newBoard = [...board.map(row => [...row])];
 		let rotations = 0;
 
@@ -103,31 +134,15 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 		}
 
 		if (JSON.stringify(board) !== JSON.stringify(newBoard)) {
-			addNewTile(newBoard);
-			setBoard(newBoard);
-			checkGameOver(newBoard);
+			// Мы создаем копию доски для addNewTile, чтобы не мутировать стейт напрямую
+			// Хотя здесь newBoard уже копия
+			const boardWithNewTile = addNewTile([...newBoard.map(row => [...row])]);
+			setBoard(boardWithNewTile);
+			checkGameOver(boardWithNewTile);
 		}
-	};
+	}, [board, addNewTile, checkGameOver, moveLeft]);
 
-	const checkGameOver = (currentBoard: number[][]) => {
-		// Проверка на победу (плитка 2048)
-		if (currentBoard.some(row => row.some(cell => cell === 2048))) {
-			onWin?.(score);
-			return;
-		}
 
-		// Проверка на возможность хода
-		for (let i = 0; i < 4; i++) {
-			for (let j = 0; j < 4; j++) {
-				if (currentBoard[i][j] === 0) return;
-				if (i < 3 && currentBoard[i][j] === currentBoard[i + 1][j]) return;
-				if (j < 3 && currentBoard[i][j] === currentBoard[i][j + 1]) return;
-			}
-		}
-
-		setGameOver(true);
-		onGameOver?.(score);
-	};
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {

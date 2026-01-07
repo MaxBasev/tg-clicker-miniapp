@@ -1,47 +1,65 @@
 # Telegram Mini Games App 🎮
 
-A collection of classic games reimagined as a Telegram Mini App. This is my experimental project created for fun and learning purposes.
+A collection of classic arcade games reimagined as a Telegram Mini App.
 
-## Games included:
-- 🐍 Snake
-- 🎲 2048
-- 🐦 Flappy Bird
+This project demonstrates a modern React application architecture designed for the Telegram ecosystem, featuring high-performance animations, touch-first controls, and a maintainable code structure.
 
-## Features:
-- Fully integrated with Telegram Mini Apps
-- Touch controls for mobile devices
-- Score tracking
-- Simple and intuitive interface
+## 🌟 Features
 
-## Technical Stack:
-- React
-- TypeScript
-- Telegram Mini Apps SDK
-- CSS for animations and styling
+- **Integrated Environment**: Fully compatible with [Telegram Mini Apps SDK](https://core.telegram.org/bots/webapps).
+- **Responsive Design**: Touch-optimized controls and layout for mobile interaction.
+- **Classic Games**:
+    - **2048**: The strategic puzzle game.
+    - **Snake**: Classic navigation and reflex game.
+    - **Flappy Rocket**: A space-themed twist on Flappy Bird.
+- **Dynamic UI**: Floating emoji backgrounds, smooth transitions, and engaging visual effects.
+
+## 🛠 Tech Stack
+
+- **Core**: [React 18](https://reactjs.org/) (Hooks, Functional Components)
+- **Language**: [TypeScript](https://www.typescriptlang.org/) for strict type safety.
+- **Build Tool**: [Vite](https://vitejs.dev/) for blazing fast development and optimized production builds.
+- **Styling**: Modern CSS3 with animations.
+- **Linting**: ESLint + Prettier for code quality.
+
+## 🚀 How to Run
+
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/maxbasev/tg-clicker-miniapp.git
+    cd tg-clicker-miniapp
+    ```
+
+2.  **Install dependencies**
+    ```bash
+    npm install
+    ```
+
+3.  **Start the development server**
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+4.  **Build for Production**
+    ```bash
+    npm run build
+    ```
+
+## 📐 Project Structure
+
+```
+src/
+├── components/     # Game components and UI elements
+├── hooks/          # Custom hooks (e.g., useSnakeGame) for logic separation
+├── styles/         # CSS styles
+├── types/          # TypeScript definitions
+└── App.tsx         # Main application entry point
+```
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
 
 ---
-
-# Мини-игры для Telegram 🎮
-
-Коллекция классических игр, переработанных в формат Telegram Mini App. Это мой экспериментальный проект, созданный для развлечения и обучения.
-
-## Доступные игры:
-- 🐍 Змейка
-- 🎲 2048
-- 🐦 Flappy Bird
-
-## Особенности:
-- Полная интеграция с Telegram Mini Apps
-- Управление через тачскрин для мобильных устройств
-- Отслеживание рекордов
-- Простой и понятный интерфейс
-
-## Технический стек:
-- React
-- TypeScript
-- Telegram Mini Apps SDK
-- CSS для анимаций и стилизации
-
-
-
-> 🎯 **Note/Примечание**: This is an experimental project created for entertainment purposes. Feel free to play around! / Это экспериментальный проект, созданный для развлечения. Не стесняйтесь играть!
+> *Created by [MaxBasev](https://github.com/maxbasev)*

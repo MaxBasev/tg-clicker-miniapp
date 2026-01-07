@@ -1,146 +1,52 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import '../styles/Snake.css';
+import { useSnakeGame } from '../hooks/useSnakeGame';
 
 interface SnakeProps {
 	onGameOver?: (score: number) => void;
 	onBack: () => void;
 }
 
-type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
-type Position = { x: number; y: number };
-
-const GRID_SIZE = 20;
-const INITIAL_SNAKE = [
-	{ x: 10, y: 10 },
-	{ x: 10, y: 11 },
-	{ x: 10, y: 12 }
-];
-const INITIAL_DIRECTION = 'UP';
-const GAME_SPEED = 150;
-
 export const Snake: React.FC<SnakeProps> = ({ onGameOver, onBack }) => {
-	const [snake, setSnake] = useState<Position[]>(INITIAL_SNAKE);
-	const [food, setFood] = useState<Position>({ x: 5, y: 5 });
-	const [direction, setDirection] = useState<Direction>(INITIAL_DIRECTION);
-	const [isGameOver, setIsGameOver] = useState(false);
-	const [score, setScore] = useState(0);
-	const [isPaused, setIsPaused] = useState(false);
-
-	const directionRef = useRef(direction);
-	const gameLoopRef = useRef<number>();
-
-	const generateFood = () => {
-		let foodPosition: Position;
-		let isValidPosition: boolean;
-
-		do {
-			foodPosition = {
-				x: Math.floor(Math.random() * GRID_SIZE),
-				y: Math.floor(Math.random() * GRID_SIZE)
-			};
-			isValidPosition = !snake.some(segment =>
-				segment.x === foodPosition.x && segment.y === foodPosition.y
-			);
-		} while (!isValidPosition);
-
-		setFood(foodPosition);
-	};
-
-	const resetGame = () => {
-		setSnake(INITIAL_SNAKE);
-		setDirection(INITIAL_DIRECTION);
-		setIsGameOver(false);
-		setScore(0);
-		generateFood();
-		setIsPaused(false);
-	};
-
-	const moveSnake = () => {
-		if (isGameOver || isPaused) return;
-
-		setSnake(currentSnake => {
-			const head = currentSnake[0];
-			const newHead = { ...head };
-
-			switch (directionRef.current) {
-				case 'UP':
-					newHead.y -= 1;
-					break;
-				case 'DOWN':
-					newHead.y += 1;
-					break;
-				case 'LEFT':
-					newHead.x -= 1;
-					break;
-				case 'RIGHT':
-					newHead.x += 1;
-					break;
-			}
-
-			// Проверка столкновения со стеной
-			if (
-				newHead.x < 0 ||
-				newHead.x >= GRID_SIZE ||
-				newHead.y < 0 ||
-				newHead.y >= GRID_SIZE
-			) {
-				setIsGameOver(true);
-				onGameOver?.(score);
-				return currentSnake;
-			}
-
-			// Проверка столкновения с собой
-			if (currentSnake.some(segment => segment.x === newHead.x && segment.y === newHead.y)) {
-				setIsGameOver(true);
-				onGameOver?.(score);
-				return currentSnake;
-			}
-
-			const newSnake = [newHead, ...currentSnake];
-
-			// Проверка еды
-			if (newHead.x === food.x && newHead.y === food.y) {
-				setScore(s => s + 10);
-				generateFood();
-			} else {
-				newSnake.pop();
-			}
-
-			return newSnake;
-		});
-	};
-
-	useEffect(() => {
-		directionRef.current = direction;
-	}, [direction]);
+	const {
+		snake,
+		food,
+		score,
+		isGameOver,
+		isPaused,
+		resetGame,
+		changeDirection,
+		togglePause,
+		GRID_SIZE
+	} = useSnakeGame({ onGameOver });
 
 	useEffect(() => {
 		const handleKeyPress = (e: KeyboardEvent) => {
 			switch (e.key) {
 				case 'ArrowUp':
-					if (directionRef.current !== 'DOWN') setDirection('UP');
+					changeDirection('UP');
 					break;
 				case 'ArrowDown':
-					if (directionRef.current !== 'UP') setDirection('DOWN');
+					changeDirection('DOWN');
 					break;
 				case 'ArrowLeft':
-					if (directionRef.current !== 'RIGHT') setDirection('LEFT');
+					changeDirection('LEFT');
 					break;
 				case 'ArrowRight':
-					if (directionRef.current !== 'LEFT') setDirection('RIGHT');
+					changeDirection('RIGHT');
 					break;
 				case ' ':
-					setIsPaused(p => !p);
+					togglePause();
 					break;
 			}
 		};
 
 		window.addEventListener('keydown', handleKeyPress);
 		return () => window.removeEventListener('keydown', handleKeyPress);
-	}, []);
+	}, [changeDirection, togglePause]);
 
-	// Обработка свайпов
-	const touchStart = useRef<Position | null>(null);
+	// Обработка свайпов (можно тоже вынести в хук, но пока оставим здесь для простоты)
+	const touchStart = React.useRef<{ x: number; y: number } | null>(null);
 	const minSwipeDistance = 30;
 
 	const handleTouchStart = (e: React.TouchEvent) => {
@@ -160,33 +66,24 @@ export const Snake: React.FC<SnakeProps> = ({ onGameOver, onBack }) => {
 
 		if (Math.abs(deltaX) > Math.abs(deltaY)) {
 			if (Math.abs(deltaX) >= minSwipeDistance) {
-				if (deltaX > 0 && directionRef.current !== 'LEFT') {
-					setDirection('RIGHT');
-				} else if (deltaX < 0 && directionRef.current !== 'RIGHT') {
-					setDirection('LEFT');
+				if (deltaX > 0) {
+					changeDirection('RIGHT');
+				} else {
+					changeDirection('LEFT');
 				}
 			}
 		} else {
 			if (Math.abs(deltaY) >= minSwipeDistance) {
-				if (deltaY > 0 && directionRef.current !== 'UP') {
-					setDirection('DOWN');
-				} else if (deltaY < 0 && directionRef.current !== 'DOWN') {
-					setDirection('UP');
+				if (deltaY > 0) {
+					changeDirection('DOWN');
+				} else {
+					changeDirection('UP');
 				}
 			}
 		}
 
 		touchStart.current = null;
 	};
-
-	useEffect(() => {
-		if (isGameOver || isPaused) return;
-
-		gameLoopRef.current = window.setInterval(moveSnake, GAME_SPEED);
-		return () => {
-			if (gameLoopRef.current) clearInterval(gameLoopRef.current);
-		};
-	}, [isGameOver, isPaused, moveSnake]);
 
 	return (
 		<div
@@ -200,7 +97,7 @@ export const Snake: React.FC<SnakeProps> = ({ onGameOver, onBack }) => {
 				</button>
 				<div className="score">Счёт: {score}</div>
 				<div className="controls">
-					<button className="control-button" onClick={() => setIsPaused(p => !p)}>
+					<button className="control-button" onClick={togglePause}>
 						{isPaused ? '▶️' : '⏸️'}
 					</button>
 					<button className="control-button" onClick={resetGame}>

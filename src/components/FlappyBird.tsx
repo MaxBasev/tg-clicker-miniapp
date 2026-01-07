@@ -59,7 +59,7 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 	const gameLoopRef = useRef<number>();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
-	const createPipe = () => {
+	const createPipe = React.useCallback(() => {
 		const minHeight = GAME_HEIGHT * 0.2;
 		const maxHeight = GAME_HEIGHT * 0.6;
 		const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
@@ -70,7 +70,34 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 			passed: false,
 			laserCharge: 1
 		};
-	};
+	}, []);
+
+	// Move jump before it's used if needed, or hoist
+	// But updateGame needs createPipe so putting createPipe first is good.
+
+	const updateGame = React.useCallback(() => {
+		if (!gameStarted || gameOver) return;
+
+		setBird(prev => ({
+			y: Math.max(0, Math.min(prev.y + prev.velocity, GAME_HEIGHT - BIRD_SIZE)),
+			velocity: prev.velocity + GRAVITY
+		}));
+
+		setPipes(prevPipes => {
+			const updatedPipes = prevPipes
+				.map(pipe => ({
+					...pipe,
+					x: pipe.x - PIPE_SPEED
+				}))
+				.filter(pipe => pipe.x + GUN_WIDTH > 0);
+
+			if (prevPipes.length === 0 || prevPipes[prevPipes.length - 1].x < GAME_WIDTH - PIPE_SPAWN_INTERVAL) {
+				return [...updatedPipes, createPipe()];
+			}
+
+			return updatedPipes;
+		});
+	}, [gameStarted, gameOver, createPipe]);
 
 	const jump = () => {
 		if (!gameStarted) {
@@ -131,31 +158,9 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 		return false;
 	};
 
-	const updateGame = () => {
-		if (!gameStarted || gameOver) return;
 
-		setBird(prev => ({
-			y: Math.max(0, Math.min(prev.y + prev.velocity, GAME_HEIGHT - BIRD_SIZE)),
-			velocity: prev.velocity + GRAVITY
-		}));
 
-		setPipes(prevPipes => {
-			const updatedPipes = prevPipes
-				.map(pipe => ({
-					...pipe,
-					x: pipe.x - PIPE_SPEED
-				}))
-				.filter(pipe => pipe.x + GUN_WIDTH > 0);
-
-			if (prevPipes.length === 0 || prevPipes[prevPipes.length - 1].x < GAME_WIDTH - PIPE_SPAWN_INTERVAL) {
-				return [...updatedPipes, createPipe()];
-			}
-
-			return updatedPipes;
-		});
-	};
-
-	const drawGame = () => {
+	const drawGame = React.useCallback(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
 		const ctx = canvas.getContext('2d');
@@ -241,7 +246,7 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 				ctx.moveTo(pipe.x + GUN_WIDTH / 2, startY);
 
 				const segments = 8;
-				const segmentHeight = Math.abs(endY - startY) / segments;
+				// const segmentHeight = Math.abs(endY - startY) / segments; // unused
 				const amplitude = 5; // Амплитуда зигзага
 
 				for (let i = 1; i <= segments; i++) {
@@ -351,7 +356,7 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 		ctx.font = 'bold 24px Arial';
 		ctx.textAlign = 'center';
 		ctx.fillText(`${score}`, GAME_WIDTH / 2, 40);
-	};
+	}, [bird, gameStarted, gameOver, pipes, score]);
 
 	useEffect(() => {
 		const gameLoop = () => {

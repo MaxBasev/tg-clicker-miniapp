@@ -14,13 +14,13 @@ type Screen = 'games' | 'game2048' | 'snake' | 'flappybird';
 const showAlert = (message: string) => {
 	try {
 		WebApp.showAlert(message);
-	} catch (e) {
+	} catch {
 		console.log('Alert message (development):', message);
 	}
 };
 
 function App() {
-    const [currentScreen, setCurrentScreen] = useState<Screen>('games');
+	const [currentScreen, setCurrentScreen] = useState<Screen>('games');
 	const [score, setScore] = useState(() => {
 		const saved = localStorage.getItem('score');
 		return saved ? parseInt(saved) : 0;
@@ -30,7 +30,7 @@ function App() {
 		try {
 			WebApp.ready();
 			WebApp.setHeaderColor('secondary_bg_color');
-		} catch (e) {
+		} catch {
 			console.log('WebApp not available in development');
 		}
 	}, []);
@@ -53,14 +53,14 @@ function App() {
 
 	const renderHeader = () => {
 		let title: string;
-        let buttonText: string | null = null;
-        let onButtonClick: (() => void) | null = null;
+		let buttonText: string | null = null;
+		let onButtonClick: (() => void) | null = null;
 
 		switch (currentScreen) {
 			case 'games':
 				title = 'Procent Mini Games';
-                buttonText = null; // no back button on games screen
-                onButtonClick = null;
+				buttonText = null; // no back button on games screen
+				onButtonClick = null;
 				break;
 			case 'game2048':
 				title = '2048';
@@ -82,14 +82,14 @@ function App() {
 		return (
 			<div className="header">
 				<h1>{title}</h1>
-                {buttonText && onButtonClick && (
-                    <button
-                        className="screen-toggle"
-                        onClick={onButtonClick}
-                    >
-                        {buttonText}
-                    </button>
-                )}
+				{buttonText && onButtonClick && (
+					<button
+						className="screen-toggle"
+						onClick={onButtonClick}
+					>
+						{buttonText}
+					</button>
+				)}
 			</div>
 		);
 	};
@@ -151,8 +151,8 @@ function App() {
 						/>
 					</div>
 				);
-            default:
-                return null;
+			default:
+				return null;
 		}
 	};
 
