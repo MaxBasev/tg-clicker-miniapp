@@ -6,7 +6,6 @@ A collection of classic games reimagined as a Telegram Mini App. This is my expe
 - 🐍 Snake
 - 🎲 2048
 - 🐦 Flappy Bird
-- 👆 Tapper
 
 ## Features:
 - Fully integrated with Telegram Mini Apps
@@ -30,7 +29,6 @@ A collection of classic games reimagined as a Telegram Mini App. This is my expe
 - 🐍 Змейка
 - 🎲 2048
 - 🐦 Flappy Bird
-- 👆 Тапалка
 
 ## Особенности:
 - Полная интеграция с Telegram Mini Apps
