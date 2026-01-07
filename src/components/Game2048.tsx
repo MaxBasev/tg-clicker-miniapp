@@ -1,4 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useHapticFeedback } from '../hooks/useHapticFeedback';
+import { useSound } from '../contexts/SoundContext';
 import '../styles/Game2048.css';
 
 interface Game2048Props {
@@ -7,256 +10,329 @@ interface Game2048Props {
 	onBack: () => void;
 }
 
-import { useHapticFeedback } from '../hooks/useHapticFeedback';
-import { useSound } from '../contexts/SoundContext';
+interface Tile {
+	id: number;
+	x: number;
+	y: number;
+	value: number;
+	isNew?: boolean;
+	isMerged?: boolean;
+}
 
 export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack }) => {
 	const { impactOccurred, notificationOccurred } = useHapticFeedback();
 	const { playSound } = useSound();
-	const [board, setBoard] = useState<number[][]>([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]);
+
+	const [tiles, setTiles] = useState<Tile[]>([]);
 	const [score, setScore] = useState(0);
 	const [gameOver, setGameOver] = useState(false);
+	const [won, setWon] = useState(false);
 
-	// Добавляем состояния для отслеживания свайпов
-	const touchStart = useRef<{ x: number; y: number } | null>(null);
-	const minSwipeDistance = 50; // Минимальное расстояние для свайпа
+	// Unique ID counter for tiles
+	const nextId = useRef(1);
+	const initialized = useRef(false);
 
-	// Инициализация игры
-	// Инициализация игры
-	// Обернем addNewTile в useCallback чтобы использовать в initGame
-	const addNewTile = React.useCallback((currentBoard: number[][]) => {
-		const available = [];
-		for (let i = 0; i < 4; i++) {
-			for (let j = 0; j < 4; j++) {
-				if (currentBoard[i][j] === 0) {
-					available.push({ x: i, y: j });
+	const BOARD_SIZE = 4;
+
+	const getEmptyCells = (currentTiles: Tile[]) => {
+		const cells: { x: number; y: number }[] = [];
+		for (let x = 0; x < BOARD_SIZE; x++) {
+			for (let y = 0; y < BOARD_SIZE; y++) {
+				if (!currentTiles.some(tile => tile.x === x && tile.y === y)) {
+					cells.push({ x, y });
 				}
 			}
 		}
-		if (available.length > 0) {
-			const randomCell = available[Math.floor(Math.random() * available.length)];
-			currentBoard[randomCell.x][randomCell.y] = Math.random() < 0.9 ? 2 : 4;
-		}
-		return currentBoard;
+		return cells;
+	};
+
+	const addRandomTile = useCallback((currentTiles: Tile[]) => {
+		const emptyCells = getEmptyCells(currentTiles);
+		if (emptyCells.length === 0) return currentTiles;
+
+		const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+		const newTile: Tile = {
+			id: nextId.current++,
+			x: randomCell.x,
+			y: randomCell.y,
+			value: Math.random() < 0.9 ? 2 : 4,
+			isNew: true
+		};
+
+		return [...currentTiles, newTile];
 	}, []);
 
-	const initGame = React.useCallback(() => {
-		const newBoard = Array(4).fill(0).map(() => Array(4).fill(0));
-		addNewTile(addNewTile(newBoard));
-		setBoard(newBoard);
+	const initGame = useCallback(() => {
 		setScore(0);
 		setGameOver(false);
-	}, [addNewTile]);
-
-	// Инициализация игры
-	const initialized = useRef(false);
+		setWon(false);
+		nextId.current = 1;
+		let newTiles: Tile[] = [];
+		newTiles = addRandomTile(newTiles);
+		newTiles = addRandomTile(newTiles);
+		setTiles(newTiles);
+	}, [addRandomTile]);
 
 	useEffect(() => {
 		if (!initialized.current) {
-			// eslint-disable-next-line
 			initGame();
 			initialized.current = true;
 		}
 	}, [initGame]);
 
-	const checkGameOver = React.useCallback((currentBoard: number[][]) => {
-		// Проверка на победу (плитка 2048)
-		if (currentBoard.some(row => row.some(cell => cell === 2048))) {
-			onWin?.(score);
-			return;
-		}
+	const checkGameOverState = useCallback((currentTiles: Tile[]) => {
+		if (getEmptyCells(currentTiles).length > 0) return false;
 
-		// Проверка на возможность хода
-		for (let i = 0; i < 4; i++) {
-			for (let j = 0; j < 4; j++) {
-				if (currentBoard[i][j] === 0) return;
-				if (i < 3 && currentBoard[i][j] === currentBoard[i + 1][j]) return;
-				if (j < 3 && currentBoard[i][j] === currentBoard[i][j + 1]) return;
+		// Check for possible merges
+		for (let x = 0; x < BOARD_SIZE; x++) {
+			for (let y = 0; y < BOARD_SIZE; y++) {
+				const current = currentTiles.find(t => t.x === x && t.y === y);
+				if (!current) continue;
+
+				const right = currentTiles.find(t => t.x === x + 1 && t.y === y);
+				const down = currentTiles.find(t => t.x === x && t.y === y + 1);
+
+				if (right && right.value === current.value) return false;
+				if (down && down.value === current.value) return false;
 			}
 		}
+		return true;
+	}, []);
 
-		setGameOver(true);
-		notificationOccurred('error');
-		playSound('gameover');
-		onGameOver?.(score);
-	}, [onWin, onGameOver, score, notificationOccurred, playSound]);
+	const move = useCallback((direction: 'left' | 'right' | 'up' | 'down') => {
+		if (gameOver) return;
 
-	const moveLeft = React.useCallback((board: number[][]) => {
-		let newScore = score;
-		const newBoard = board.map(row => {
-			const line = row.filter(cell => cell !== 0);
-			for (let i = 0; i < line.length - 1; i++) {
-				if (line[i] === line[i + 1]) {
-					line[i] *= 2;
-					newScore += line[i];
-					line.splice(i + 1, 1);
+		setTiles(prevTiles => {
+			let hasChanged = false;
+			let newScore = score;
+			const newTiles = [...prevTiles].map(t => ({ ...t, isNew: false, isMerged: false }));
+
+			// Helper to get tile at position in the working set
+			const getTileAt = (tiles: Tile[], x: number, y: number) => tiles.find(t => t.x === x && t.y === y);
+
+			// Vectors for iteration
+			const vectors = {
+				left: { x: 1, y: 0 },
+				right: { x: -1, y: 0 },
+				up: { x: 0, y: 1 },
+				down: { x: 0, y: -1 }
+			};
+
+			const vector = vectors[direction];
+			const isHorizontal = direction === 'left' || direction === 'right';
+
+			// Traverse direction
+			const traveralsX = [0, 1, 2, 3];
+			const traveralsY = [0, 1, 2, 3];
+
+			if (direction === 'right') traveralsX.reverse();
+			if (direction === 'down') traveralsY.reverse();
+
+			// Logic: Iterate through columns/rows (perpendicular to move direction)
+			// Then iterate along the line of movement to stack tiles
+
+			// Simplified approach: Group by row/col and process each line independently
+			const lines: Tile[][] = [];
+
+			if (isHorizontal) {
+				for (let y = 0; y < BOARD_SIZE; y++) {
+					lines.push(newTiles.filter(t => t.y === y).sort((a, b) => direction === 'left' ? a.x - b.x : b.x - a.x));
+				}
+			} else {
+				for (let x = 0; x < BOARD_SIZE; x++) {
+					lines.push(newTiles.filter(t => t.x === x).sort((a, b) => direction === 'up' ? a.y - b.y : b.y - a.y));
 				}
 			}
-			while (line.length < 4) line.push(0);
-			return line;
-		});
-		setScore(newScore);
-		return newBoard;
-	}, [score]);
 
-	// Move rotate definition here or make it separate pure function outside if possible, 
-	// but for now keeping inside component is easiest to avoid large refactor
-	const rotate = (board: number[][]) => {
-		const newBoard = Array(4).fill(0).map(() => Array(4).fill(0));
-		for (let i = 0; i < 4; i++) {
-			for (let j = 0; j < 4; j++) {
-				newBoard[i][j] = board[3 - j][i];
+			const processedTiles: Tile[] = [];
+
+			lines.forEach(line => {
+				let targetPos = (direction === 'left' || direction === 'up') ? 0 : 3;
+				const increment = (direction === 'left' || direction === 'up') ? 1 : -1;
+
+				for (let i = 0; i < line.length; i++) {
+					const tile = line[i];
+
+					// Check next tile for merge
+					if (i < line.length - 1 && line[i + 1].value === tile.value) {
+						// Merge
+						const nextTile = line[i + 1];
+
+						// Update position of current tile (it moves to target)
+						// And position of next tile (it moves to target too)
+						// Then they are replaced by a merged tile
+
+						// In this simulated approach for React state, we effectively remove both and add a new one?
+						// Or keep one ID? To animate correctly, we usually keep the 'surviving' ID or create a new one.
+						// Best animation: Both slide to the same spot, then are replaced by a new doubled tile.
+						// But framer-motion layout animation handles "position change" well.
+						// Handling "merge" (2 becoming 1) is trickier.
+
+						// Strategy: Update 'tile' to new position. Mark 'nextTile' as "to be deleted" but moving to same position?
+						// Simpler: Just create a new tile state immediately. Framer motion might jump if ID changes.
+						// To enable smooth merge:
+						// 1. We update `tile` to move to `targetPos`.
+						// 2. We update `nextTile` to move to `targetPos`.
+						// 3. We create a NEW tile at `targetPos` with doubled value.
+						// 4. We rely on React Key behavior.
+
+						// For simplicity in this version without complex layout transitions:
+						// We will just update properties.
+
+						const newValue = tile.value * 2;
+						newScore += newValue;
+
+						// We create a merged tile.
+						// Note: We "recycle" one ID to keep continuity for at least one tile?
+						// Let's keep `tile` and upgrade it, and destroy `nextTile`.
+
+						tile.value = newValue;
+						tile.isMerged = true;
+
+						if (isHorizontal) tile.x = targetPos; else tile.y = targetPos;
+
+						// Mark nextTile for deletion or handle implicitly by not adding it to processed
+						// But to animate the slide of the second tile merging, it needs to 'exist' briefly.
+						// For now, simpler implementation: standard 2048 logic, one step per keypress.
+
+						processedTiles.push(tile);
+						// Skip next tile
+						i++;
+
+						hasChanged = true; // Value changed implies board changed
+						// Check position change for the first tile
+						// (Technically complex to check every field, assuming true if merge happened)
+					} else {
+						// Just move
+						const oldX = tile.x;
+						const oldY = tile.y;
+
+						if (isHorizontal) tile.x = targetPos; else tile.y = targetPos;
+
+						if (tile.x !== oldX || tile.y !== oldY) hasChanged = true;
+
+						processedTiles.push(tile);
+					}
+					targetPos += increment;
+				}
+			});
+
+			if (hasChanged) {
+				// Check win
+				if (processedTiles.some(t => t.value === 2048) && !won) {
+					setWon(true);
+					onWin?.(newScore);
+					playSound('success');
+				} else {
+					playSound('move');
+					impactOccurred('medium');
+				}
+
+				setScore(newScore);
+
+				// Add new random tile
+				const tilesAfterMove = addRandomTile(processedTiles);
+
+				// Check game over
+				if (checkGameOverState(tilesAfterMove)) {
+					setGameOver(true);
+					playSound('gameover');
+					notificationOccurred('error');
+					onGameOver?.(newScore);
+				}
+
+				return tilesAfterMove;
 			}
-		}
-		return newBoard;
-	};
 
-	const move = React.useCallback((direction: 'left' | 'right' | 'up' | 'down') => {
-		let newBoard = [...board.map(row => [...row])];
-		let rotations = 0;
-
-		switch (direction) {
-			case 'right':
-				rotations = 2;
-				break;
-			case 'up':
-				rotations = 1;
-				break;
-			case 'down':
-				rotations = 3;
-				break;
-		}
-
-		// Поворачиваем доску
-		for (let i = 0; i < rotations; i++) {
-			newBoard = rotate(newBoard);
-		}
-
-		// Делаем ход влево
-		newBoard = moveLeft(newBoard);
-
-		// Поворачиваем обратно
-		for (let i = 0; i < (4 - rotations) % 4; i++) {
-			newBoard = rotate(newBoard);
-		}
-
-		if (JSON.stringify(board) !== JSON.stringify(newBoard)) {
-			// Мы создаем копию доски для addNewTile, чтобы не мутировать стейт напрямую
-			// Хотя здесь newBoard уже копия
-			const boardWithNewTile = addNewTile([...newBoard.map(row => [...row])]);
-			setBoard(boardWithNewTile);
-			impactOccurred('medium');
-			playSound('move');
-			if (newBoard.flat().some(cell => cell === 2048)) playSound('success');
-			checkGameOver(boardWithNewTile);
-		}
-	}, [board, addNewTile, checkGameOver, moveLeft, impactOccurred, playSound]);
-
-
+			return prevTiles;
+		});
+	}, [gameOver, score, addRandomTile, checkGameOverState, impactOccurred, playSound, won, onWin, onGameOver]);
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (gameOver) return;
-
 			switch (e.key) {
-				case 'ArrowLeft':
-					move('left');
-					break;
-				case 'ArrowRight':
-					move('right');
-					break;
-				case 'ArrowUp':
-					move('up');
-					break;
-				case 'ArrowDown':
-					move('down');
-					break;
+				case 'ArrowLeft': move('left'); break;
+				case 'ArrowRight': move('right'); break;
+				case 'ArrowUp': move('up'); break;
+				case 'ArrowDown': move('down'); break;
 			}
 		};
-
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
-	}, [gameOver, move]);
+	}, [move]);
+
+	// Swipe handling
+	const touchStart = useRef<{ x: number; y: number } | null>(null);
+	const minSwipeDistance = 50;
 
 	const handleTouchStart = (e: React.TouchEvent) => {
 		const touch = e.touches[0];
-		touchStart.current = {
-			x: touch.clientX,
-			y: touch.clientY
-		};
-	};
-
-	const handleTouchMove = (e: React.TouchEvent) => {
-		e.preventDefault(); // Предотвращаем скролл страницы
+		touchStart.current = { x: touch.clientX, y: touch.clientY };
 	};
 
 	const handleTouchEnd = (e: React.TouchEvent) => {
 		if (!touchStart.current) return;
-
 		const touch = e.changedTouches[0];
 		const deltaX = touch.clientX - touchStart.current.x;
 		const deltaY = touch.clientY - touchStart.current.y;
 
-		// Определяем направление свайпа по большему изменению координат
 		if (Math.abs(deltaX) > Math.abs(deltaY)) {
-			if (Math.abs(deltaX) >= minSwipeDistance) {
-				if (deltaX > 0) {
-					move('right');
-				} else {
-					move('left');
-				}
-			}
+			if (Math.abs(deltaX) >= minSwipeDistance) move(deltaX > 0 ? 'right' : 'left');
 		} else {
-			if (Math.abs(deltaY) >= minSwipeDistance) {
-				if (deltaY > 0) {
-					move('up');
-				} else {
-					move('down');
-				}
-			}
+			if (Math.abs(deltaY) >= minSwipeDistance) move(deltaY > 0 ? 'down' : 'up');
 		}
-
-		touchStart.current = null;
 	};
 
 	return (
 		<div className="game-2048">
 			<div className="game-header">
-				<button className="back-button" onClick={onBack}>
-					← Назад
-				</button>
+				<button className="back-button" onClick={onBack}>← Назад</button>
 				<div className="score-container">
 					<div className="score-label">Счёт</div>
 					<div className="score-value">{score}</div>
 				</div>
-				<button className="new-game-btn" onClick={initGame}>
-					Новая игра
-				</button>
+				<button className="new-game-btn" onClick={initGame}>Новая игра</button>
 			</div>
 
 			<div
-				className="game-board"
+				className="game-board-container"
 				onTouchStart={handleTouchStart}
-				onTouchMove={handleTouchMove}
 				onTouchEnd={handleTouchEnd}
 			>
-				{board.map((row, i) => (
-					row.map((cell, j) => (
-						<div key={`${i}-${j}`} className={`tile tile-${cell}`}>
-							{cell !== 0 && cell}
-						</div>
-					))
-				))}
-			</div>
-
-			<div className="game-instructions">
-				<p>Используйте свайпы для перемещения плиток</p>
-				<div className="swipe-hints">
-					<span>←</span>
-					<span>↑</span>
-					<span>↓</span>
-					<span>→</span>
+				<div className="game-grid-background">
+					{Array.from({ length: 16 }).map((_, i) => (
+						<div key={i} className="grid-cell" />
+					))}
 				</div>
+
+				<AnimatePresence>
+					{tiles.map(tile => (
+						<motion.div
+							key={tile.id}
+							className={`tile tile-${tile.value}`}
+							initial={tile.isNew ? { scale: 0 } : false}
+							animate={{
+								x: tile.x * 100 + tile.x * 10, // 100px size + 10px gap
+								y: tile.y * 100 + tile.y * 10,
+								scale: tile.isMerged ? [1, 1.2, 1] : 1
+							}}
+							transition={{
+								x: { type: "spring", stiffness: 400, damping: 25 },
+								y: { type: "spring", stiffness: 400, damping: 25 },
+								scale: { duration: 0.2 }
+							}}
+							style={{
+								position: 'absolute',
+								width: '100px',
+								height: '100px',
+								top: '10px',  // Offset for padding
+								left: '10px' // Offset for padding
+							}}
+						>
+							<div className="tile-inner">{tile.value}</div>
+						</motion.div>
+					))}
+				</AnimatePresence>
 			</div>
 
 			{gameOver && (
