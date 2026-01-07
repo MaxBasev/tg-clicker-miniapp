@@ -106,9 +106,9 @@ export const Snake: React.FC<SnakeProps> = ({ onGameOver, onBack }) => {
 		>
 			<div className="game-header">
 				<button className="back-button" onClick={onBack}>
-					← Назад
+					← Back
 				</button>
-				<div className="score">Счёт: {score}</div>
+				<div className="score">Score: {score}</div>
 				<div className="controls">
 					<button className="control-button" onClick={togglePause}>
 						{isPaused ? '▶️' : '⏸️'}
@@ -142,9 +142,9 @@ export const Snake: React.FC<SnakeProps> = ({ onGameOver, onBack }) => {
 			{isGameOver && (
 				<div className="game-over">
 					<div className="game-over-content">
-						<h2>Игра окончена!</h2>
-						<p>Счёт: {score}</p>
-						<button onClick={resetGame}>Играть снова</button>
+						<h2>Game Over!</h2>
+						<p>Score: {score}</p>
+						<button onClick={resetGame}>Play Again</button>
 					</div>
 				</div>
 			)}

@@ -4,13 +4,14 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    color: var(--tg-theme-text-color);
 }
 
 .shop-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--tg-theme-secondary-bg-color, rgba(255, 255, 255, 0.1));
     padding: 15px 20px;
     border-radius: 16px;
     backdrop-filter: blur(10px);
@@ -31,7 +32,7 @@
 }
 
 .shop-item {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--tg-theme-secondary-bg-color, rgba(255, 255, 255, 0.05));
     border-radius: 12px;
     padding: 15px;
     display: flex;

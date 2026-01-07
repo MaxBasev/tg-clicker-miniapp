@@ -1,0 +1,132 @@
+.leaderboard-screen {
+    padding: 20px;
+    height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    background: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+}
+
+.leaderboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.leaderboard-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.leaderboard-tabs {
+    display: flex;
+    background: var(--tg-theme-secondary-bg-color);
+    padding: 4px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    gap: 4px;
+}
+
+.tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 4px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--tg-theme-hint-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    background: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.leaderboard-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.scores-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.score-item {
+    display: flex;
+    align-items: center;
+    background: var(--tg-theme-secondary-bg-color);
+    padding: 12px 16px;
+    border-radius: 12px;
+}
+
+.score-rank {
+    font-size: 18px;
+    font-weight: bold;
+    width: 40px;
+    color: var(--tg-theme-hint-color);
+}
+
+.score-item:nth-child(1) .score-rank {
+    color: #FFD700;
+}
+
+/* Gold */
+.score-item:nth-child(2) .score-rank {
+    color: #C0C0C0;
+}
+
+/* Silver */
+.score-item:nth-child(3) .score-rank {
+    color: #CD7F32;
+}
+
+/* Bronze */
+
+.score-info {
+    flex: 1;
+}
+
+.score-player {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.score-date {
+    font-size: 11px;
+    color: var(--tg-theme-hint-color);
+}
+
+.score-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--tg-theme-button-color);
+}
+
+.no-scores {
+    text-align: center;
+    padding-top: 60px;
+    opacity: 0.6;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.no-scores p {
+    margin: 4px 0;
+}
+
+.sub-text {
+    font-size: 13px;
+    color: var(--tg-theme-hint-color);
+}

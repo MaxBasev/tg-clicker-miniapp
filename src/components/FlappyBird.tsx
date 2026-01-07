@@ -378,11 +378,11 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 		<div className="flappy-bird">
 			<div className="game-header">
 				<button className="back-button" onClick={onBack}>
-					← Назад
+					← Back
 				</button>
 				<div className="score-container">
-					<div>Счёт: {score}</div>
-					<div>Рекорд: {highScore}</div>
+					<div>Score: {score}</div>
+					<div>Best: {highScore}</div>
 				</div>
 			</div>
 
@@ -397,9 +397,9 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 			{!gameStarted && !gameOver && (
 				<div className="game-message">
 					<div className="message-content">
-						<div>Нажмите, чтобы запустить ракету 🚀</div>
+						<div>Tap to launch 🚀</div>
 						<div className="game-tip">
-							Подсказка: Легкими нажатиями удерживайте ракету между лазерами
+							Tip: Tap lightly to keep the rocket between lasers
 						</div>
 					</div>
 				</div>
@@ -408,9 +408,9 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 			{gameOver && (
 				<div className="game-message game-over-message">
 					<div className="message-content">
-						<div className="game-over-title">Крушение! 💥</div>
-						<div className="final-score">Счёт: {score}</div>
-						<div className="tap-to-restart">Нажмите, чтобы запустить новую ракету</div>
+						<div className="game-over-title">Crashed! 💥</div>
+						<div className="final-score">Score: {score}</div>
+						<div className="tap-to-restart">Tap to launch new rocket</div>
 					</div>
 				</div>
 			)}

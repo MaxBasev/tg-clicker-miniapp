@@ -1,10 +1,27 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--tg-theme-bg-color, #ffffff);
+  color: var(--tg-theme-text-color, #000000);
+}
+
+body.theme-neon {
+  --tg-theme-bg-color: #050510;
+  --tg-theme-text-color: #0ff;
+  --tg-theme-hint-color: #0088cc;
+  --tg-theme-link-color: #f0f;
+  --tg-theme-button-color: #f0f;
+  --tg-theme-button-text-color: #fff;
+  --tg-theme-secondary-bg-color: #0a0a20;
+}
+
 .actions {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   padding: 16px;
-  background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.2)), var(--tg-theme-bg-color);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2)), var(--tg-theme-bg-color);
   border-top: 1px solid var(--tg-theme-hint-color, rgba(0, 0, 0, 0.1));
   display: flex;
   justify-content: center;
@@ -15,6 +32,7 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -44,8 +62,13 @@
 
 /* Анимации */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .card {
@@ -61,7 +84,7 @@
 }
 
 .screen-toggle {
-  background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
   border: none;
   padding: 8px 16px;
   border-radius: 20px;
@@ -69,19 +92,20 @@
   font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255,255,255,0.06);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 .screen-toggle:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.1);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .screen-toggle:active {
   transform: translateY(0);
 }
 
-.main-screen, .games-screen {
+.main-screen,
+.games-screen {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -99,6 +123,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -126,4 +151,3 @@ h1 {
   padding: 0 16px;
   animation: fadeIn 0.3s ease-in-out;
 }
-  

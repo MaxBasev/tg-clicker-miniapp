@@ -8,13 +8,15 @@ interface MiniGameProps {
 	onGame2048Select: () => void;
 	onSnakeSelect: () => void;
 	onFlappyBirdSelect: () => void;
+	onLeaderboardSelect: () => void;
 }
 
 export const MiniGames: React.FC<MiniGameProps> = ({
 	score,
 	onGame2048Select,
 	onSnakeSelect,
-	onFlappyBirdSelect
+	onFlappyBirdSelect,
+	onLeaderboardSelect
 }) => {
 	const { impactOccurred } = useHapticFeedback();
 	const { playSound } = useSound();
@@ -32,29 +34,39 @@ export const MiniGames: React.FC<MiniGameProps> = ({
 			price: 0,
 			reward: 0,
 			icon: '🧩',
-			description: 'Классическая головоломка',
+			description: 'Classic puzzle game',
 			action: () => handleGameSelect(onGame2048Select),
 			color: '#FF6B6B'
 		},
 		{
 			id: 'snake',
-			name: 'Змейка',
+			name: 'Snake',
 			price: 0,
 			reward: 0,
 			icon: '🐍',
-			description: 'Собирай яблоки',
+			description: 'Collect apples',
 			action: () => handleGameSelect(onSnakeSelect),
 			color: '#4CAF50'
 		},
 		{
 			id: 'flappybird',
-			name: 'Космическая ракета',
+			name: 'Space Rocket',
 			price: 0,
 			reward: 0,
 			icon: '🚀',
-			description: 'Преодолей все препятствия',
+			description: 'Avoid obstacles',
 			action: () => handleGameSelect(onFlappyBirdSelect),
 			color: '#2196F3'
+		},
+		{
+			id: 'leaderboard',
+			name: 'Leaderboard',
+			price: 0,
+			reward: 0,
+			icon: '🏆',
+			description: 'Top scores',
+			action: () => handleGameSelect(onLeaderboardSelect),
+			color: '#FFD700'
 		}
 	];
 
@@ -79,12 +91,12 @@ export const MiniGames: React.FC<MiniGameProps> = ({
 							<p>{game.description}</p>
 							{game.price > 0 && (
 								<div className="game-price">
-									Цена: {game.price} 🪙
+									Price: {game.price} 🪙
 								</div>
 							)}
 							{game.reward > 0 && (
 								<div className="game-reward">
-									Награда: {game.reward} 🪙
+									Reward: {game.reward} 🪙
 								</div>
 							)}
 						</div>
