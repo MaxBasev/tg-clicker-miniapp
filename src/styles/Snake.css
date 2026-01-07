@@ -50,9 +50,15 @@
 }
 
 .cell.snake {
-  background: #4CAF50;
+  background-color: #4CAF50;
   border-radius: 4px;
-  transform: scale(0.9);
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+.cell.snake.golden {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+  border: 1px solid #FFF8DC;
 }
 
 .cell.head {
@@ -61,7 +67,7 @@
 }
 
 .cell.food {
-  background: #F44336;
+  background-color: #F44336;
   border-radius: 50%;
   transform: scale(0.8);
   animation: pulse 1s infinite;
@@ -104,9 +110,17 @@
 }
 
 @keyframes pulse {
-  0% { transform: scale(0.8); }
-  50% { transform: scale(0.9); }
-  100% { transform: scale(0.8); }
+  0% {
+    transform: scale(0.8);
+  }
+
+  50% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(0.8);
+  }
 }
 
 .back-button {
@@ -134,4 +148,4 @@
 .controls {
   display: flex;
   gap: 8px;
-} 
+}

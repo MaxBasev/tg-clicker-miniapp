@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useHapticFeedback } from './useHapticFeedback';
+import { useSound } from '../contexts/SoundContext';
 
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 export type Position = { x: number; y: number };
@@ -17,6 +19,8 @@ interface UseSnakeGameProps {
 }
 
 export const useSnakeGame = ({ onGameOver }: UseSnakeGameProps) => {
+    const { impactOccurred, notificationOccurred } = useHapticFeedback();
+    const { playSound } = useSound();
     const [snake, setSnake] = useState<Position[]>(INITIAL_SNAKE);
     const [food, setFood] = useState<Position>({ x: 5, y: 5 });
     const [direction, setDirection] = useState<Direction>(INITIAL_DIRECTION);
@@ -91,6 +95,8 @@ export const useSnakeGame = ({ onGameOver }: UseSnakeGameProps) => {
                 newHead.y >= GRID_SIZE
             ) {
                 setIsGameOver(true);
+                notificationOccurred('error');
+                playSound('gameover');
                 if (onGameOver) onGameOver(score);
                 return currentSnake;
             }
@@ -98,6 +104,8 @@ export const useSnakeGame = ({ onGameOver }: UseSnakeGameProps) => {
             // Self Collision
             if (currentSnake.some(segment => segment.x === newHead.x && segment.y === newHead.y)) {
                 setIsGameOver(true);
+                notificationOccurred('error');
+                playSound('gameover');
                 if (onGameOver) onGameOver(score);
                 return currentSnake;
             }
@@ -107,14 +115,17 @@ export const useSnakeGame = ({ onGameOver }: UseSnakeGameProps) => {
             // Food Collision
             if (newHead.x === food.x && newHead.y === food.y) {
                 setScore(s => s + 10);
+                impactOccurred('medium');
+                playSound('success');
                 generateFood(newSnake);
             } else {
                 newSnake.pop();
+                playSound('move');
             }
 
             return newSnake;
         });
-    }, [isGameOver, isPaused, food, score, onGameOver, generateFood]);
+    }, [isGameOver, isPaused, food, score, onGameOver, generateFood, impactOccurred, notificationOccurred, playSound]);
 
     // Game Loop
     useEffect(() => {

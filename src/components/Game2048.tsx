@@ -7,7 +7,12 @@ interface Game2048Props {
 	onBack: () => void;
 }
 
+import { useHapticFeedback } from '../hooks/useHapticFeedback';
+import { useSound } from '../contexts/SoundContext';
+
 export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack }) => {
+	const { impactOccurred, notificationOccurred } = useHapticFeedback();
+	const { playSound } = useSound();
 	const [board, setBoard] = useState<number[][]>([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]);
 	const [score, setScore] = useState(0);
 	const [gameOver, setGameOver] = useState(false);
@@ -71,8 +76,10 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 		}
 
 		setGameOver(true);
+		notificationOccurred('error');
+		playSound('gameover');
 		onGameOver?.(score);
-	}, [onWin, onGameOver, score]);
+	}, [onWin, onGameOver, score, notificationOccurred, playSound]);
 
 	const moveLeft = React.useCallback((board: number[][]) => {
 		let newScore = score;
@@ -138,9 +145,12 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 			// Хотя здесь newBoard уже копия
 			const boardWithNewTile = addNewTile([...newBoard.map(row => [...row])]);
 			setBoard(boardWithNewTile);
+			impactOccurred('medium');
+			playSound('move');
+			if (newBoard.flat().some(cell => cell === 2048)) playSound('success');
 			checkGameOver(boardWithNewTile);
 		}
-	}, [board, addNewTile, checkGameOver, moveLeft]);
+	}, [board, addNewTile, checkGameOver, moveLeft, impactOccurred, playSound]);
 
 
 

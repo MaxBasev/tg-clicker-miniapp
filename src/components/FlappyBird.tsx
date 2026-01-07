@@ -31,17 +31,14 @@ const GUN_WIDTH = 50;
 const GUN_HEIGHT = 60;
 const LASER_GAP = 180;
 
-// Добавим новые константы для визуальных эффектов
-const STARS: { x: number; y: number; size: number; speed: number }[] = Array(50)
-	.fill(0)
-	.map(() => ({
-		x: Math.random() * GAME_WIDTH,
-		y: Math.random() * GAME_HEIGHT,
-		size: Math.random() * 2 + 1,
-		speed: Math.random() * 0.5 + 0.5
-	}));
+import { Star, Particle } from '../utils/visuals';
+
+import { useHapticFeedback } from '../hooks/useHapticFeedback';
+import { useSound } from '../contexts/SoundContext';
 
 export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) => {
+	const { impactOccurred, notificationOccurred } = useHapticFeedback();
+	const { playSound } = useSound();
 	const [gameStarted, setGameStarted] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
 	const [score, setScore] = useState(0);
@@ -56,6 +53,18 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 	});
 
 	const [pipes, setPipes] = useState<Pipe[]>([]);
+
+	// Visual systems
+	const starsRef = useRef<Star[]>([]);
+	const particlesRef = useRef<Particle[]>([]);
+
+	// Initialize stars once
+	useEffect(() => {
+		if (starsRef.current.length === 0) {
+			starsRef.current = Array(50).fill(0).map(() => new Star(GAME_WIDTH, GAME_HEIGHT));
+		}
+	}, []);
+
 	const gameLoopRef = useRef<number>();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -106,6 +115,8 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 		}
 
 		if (!gameOver) {
+			impactOccurred('light');
+			playSound('jump');
 			setBird(prev => ({
 				...prev,
 				velocity: JUMP_FORCE
@@ -128,35 +139,21 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 		}
 	};
 
-	const checkCollision = (birdY: number, pipes: Pipe[]): boolean => {
-		const birdRadius = BIRD_SIZE * 0.3;
-		const birdX = BIRD_SIZE;
+	const checkCollision = React.useCallback((birdY: number, currentPipes: Pipe[]) => {
+		if (birdY < 0 || birdY + BIRD_SIZE > GAME_HEIGHT) return true;
 
-		for (const pipe of pipes) {
+		for (const pipe of currentPipes) {
+			// Simplified collision box for simplicity in this version
 			if (
-				birdX + birdRadius > pipe.x &&
-				birdX - birdRadius < pipe.x + GUN_WIDTH
+				BIRD_SIZE + BIRD_SIZE > pipe.x &&
+				BIRD_SIZE < pipe.x + GUN_WIDTH &&
+				(birdY < pipe.topHeight - LASER_GAP / 2 || birdY + BIRD_SIZE > pipe.topHeight + LASER_GAP / 2)
 			) {
-				if (birdY - birdRadius < pipe.topHeight - LASER_GAP / 2) {
-					return true;
-				}
-				if (birdY + birdRadius > pipe.topHeight + LASER_GAP / 2) {
-					return true;
-				}
-
-				if (!pipe.passed && birdX > pipe.x + GUN_WIDTH) {
-					pipe.passed = true;
-					setScore(prev => prev + 1);
-				}
+				return true;
 			}
 		}
-
-		if (birdY - birdRadius <= 0 || birdY + birdRadius >= GAME_HEIGHT) {
-			return true;
-		}
-
 		return false;
-	};
+	}, []);
 
 
 
@@ -176,15 +173,10 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 		ctx.fillStyle = gradient;
 		ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-		// Рисуем звезды
-		ctx.fillStyle = '#FFF';
-		STARS.forEach(star => {
-			star.x -= star.speed;
-			if (star.x < 0) star.x = GAME_WIDTH;
-
-			ctx.beginPath();
-			ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-			ctx.fill();
+		// Рисуем звезды (Parallax)
+		starsRef.current.forEach(star => {
+			star.update(GAME_WIDTH, GAME_HEIGHT);
+			star.draw(ctx);
 		});
 
 		// Рисуем лазерные пушки и лазеры
@@ -246,8 +238,7 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 				ctx.moveTo(pipe.x + GUN_WIDTH / 2, startY);
 
 				const segments = 8;
-				// const segmentHeight = Math.abs(endY - startY) / segments; // unused
-				const amplitude = 5; // Амплитуда зигзага
+				const amplitude = 5;
 
 				for (let i = 1; i <= segments; i++) {
 					const y = startY + (endY - startY) * (i / segments);
@@ -327,29 +318,25 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 		ctx.textBaseline = 'middle';
 		ctx.fillText('🚀', 0, 0);
 
-		// Выхлоп ракеты
+		ctx.restore();
+
+		// Update and draw particles (exhaust)
 		if (gameStarted && !gameOver) {
-			const particles = 5;
+			const particles = 2; // Reduced per frame
 			for (let i = 0; i < particles; i++) {
-				const offset = (Math.random() - 0.5) * 10;
-				const distance = Math.random() * 20 + 10;
-				const size = Math.random() * 8 + 4;
-
-				const particleGradient = ctx.createRadialGradient(
-					-distance, offset, 0,
-					-distance, offset, size
-				);
-				particleGradient.addColorStop(0, 'rgba(255, 165, 0, 0.8)');
-				particleGradient.addColorStop(1, 'rgba(255, 69, 0, 0)');
-
-				ctx.fillStyle = particleGradient;
-				ctx.beginPath();
-				ctx.arc(-distance, offset, size, 0, Math.PI * 2);
-				ctx.fill();
+				particlesRef.current.push(new Particle(BIRD_SIZE - 10, bird.y + BIRD_SIZE / 2)); // Emitting from rocket tail
 			}
 		}
 
-		ctx.restore();
+		// Draw and update particles
+		particlesRef.current.forEach((p, index) => {
+			p.update();
+			if (p.life <= 0) {
+				particlesRef.current.splice(index, 1);
+			} else {
+				p.draw(ctx);
+			}
+		});
 
 		// Рисуем счет
 		ctx.fillStyle = '#FFF';
@@ -365,6 +352,8 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 
 			if (checkCollision(bird.y, pipes)) {
 				setGameOver(true);
+				notificationOccurred('error');
+				playSound('gameover');
 				if (score > highScore) {
 					setHighScore(score);
 					localStorage.setItem('flappyHighScore', score.toString());
@@ -383,7 +372,7 @@ export const FlappyBird: React.FC<FlappyBirdProps> = ({ onGameOver, onBack }) =>
 				cancelAnimationFrame(gameLoopRef.current);
 			}
 		};
-	}, [gameStarted, gameOver, bird, pipes, updateGame, drawGame, score, highScore, onGameOver]);
+	}, [gameStarted, gameOver, bird, pipes, updateGame, drawGame, score, highScore, onGameOver, notificationOccurred, playSound, checkCollision]);
 
 	return (
 		<div className="flappy-bird">

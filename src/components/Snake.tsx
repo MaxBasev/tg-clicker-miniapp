@@ -20,6 +20,19 @@ export const Snake: React.FC<SnakeProps> = ({ onGameOver, onBack }) => {
 		GRID_SIZE
 	} = useSnakeGame({ onGameOver });
 
+	// Load shop items on mount to check for active skins
+	const [shopItems] = React.useState<{ id: string; active: boolean }[]>(() => {
+		try {
+			return JSON.parse(localStorage.getItem('shopItems') || '[]');
+		} catch {
+			return [];
+		}
+	});
+
+	// Check if golden skin is purchased AND active
+	const goldenSkin = shopItems.find((item: { id: string; active: boolean }) => item.id === 'skin_snake_golden' && item.active);
+	const activeSkinClass = goldenSkin ? 'golden' : '';
+
 	useEffect(() => {
 		const handleKeyPress = (e: KeyboardEvent) => {
 			switch (e.key) {
@@ -45,9 +58,9 @@ export const Snake: React.FC<SnakeProps> = ({ onGameOver, onBack }) => {
 		return () => window.removeEventListener('keydown', handleKeyPress);
 	}, [changeDirection, togglePause]);
 
-	// Обработка свайпов (можно тоже вынести в хук, но пока оставим здесь для простоты)
+	// Обработка свайпов
 	const touchStart = React.useRef<{ x: number; y: number } | null>(null);
-	const minSwipeDistance = 30;
+	const minSwipeDistance = 20; // More sensitive
 
 	const handleTouchStart = (e: React.TouchEvent) => {
 		const touch = e.touches[0];
@@ -114,10 +127,13 @@ export const Snake: React.FC<SnakeProps> = ({ onGameOver, onBack }) => {
 					const isFood = food.x === x && food.y === y;
 					const isHead = snake[0].x === x && snake[0].y === y;
 
+					// Apply skin class if this cell is part of snake
+					const cellSkinClass = isSnake ? activeSkinClass : '';
+
 					return (
 						<div
 							key={index}
-							className={`cell ${isSnake ? 'snake' : ''} ${isFood ? 'food' : ''} ${isHead ? 'head' : ''}`}
+							className={`cell ${isSnake ? 'snake' : ''} ${cellSkinClass} ${isFood ? 'food' : ''} ${isHead ? 'head' : ''}`}
 						/>
 					);
 				})}

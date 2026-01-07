@@ -4,11 +4,14 @@ import { MiniGames } from './components/MiniGames';
 import { Game2048 } from './components/Game2048';
 import { Snake } from './components/Snake';
 import { FlappyBird } from './components/FlappyBird';
+import { Shop } from './components/Shop';
 import { Layout } from './components/Layout';
 import { FloatingEmojis } from './components/FloatingEmojis';
+import { SoundProvider, useSound } from './contexts/SoundContext';
+import { ScreenTransition } from './components/ScreenTransition';
 import './styles/App.css';
 
-type Screen = 'games' | 'game2048' | 'snake' | 'flappybird';
+type Screen = 'games' | 'game2048' | 'snake' | 'flappybird' | 'shop';
 
 // Вспомогательная функция для безопасного показа алертов
 const showAlert = (message: string) => {
@@ -41,7 +44,8 @@ function App() {
 			games: 'Procent Mini Games • Telegram',
 			game2048: '2048 • Mini Games',
 			snake: 'Snake • Mini Games',
-			flappybird: 'Flappy Rocket • Mini Games'
+			flappybird: 'Flappy Rocket • Mini Games',
+			shop: 'Магазин • Mini Games'
 		};
 		document.title = titles[currentScreen];
 	}, [currentScreen]);
@@ -50,6 +54,8 @@ function App() {
 		setScore(newScore);
 		localStorage.setItem('score', newScore.toString());
 	};
+
+	const { isMuted, toggleMute } = useSound();
 
 	const renderHeader = () => {
 		let title: string;
@@ -77,19 +83,34 @@ function App() {
 				buttonText = '🔙 К играм';
 				onButtonClick = () => setCurrentScreen('games');
 				break;
+			case 'shop':
+				title = 'Магазин';
+				buttonText = '🔙 К играм';
+				onButtonClick = () => setCurrentScreen('games');
+				break;
 		}
 
 		return (
 			<div className="header">
 				<h1>{title}</h1>
-				{buttonText && onButtonClick && (
-					<button
-						className="screen-toggle"
-						onClick={onButtonClick}
-					>
-						{buttonText}
+				<div className="header-controls">
+					{currentScreen === 'games' && (
+						<button className="shop-button" onClick={() => setCurrentScreen('shop')}>
+							🛒
+						</button>
+					)}
+					<button className="sound-toggle" onClick={toggleMute}>
+						{isMuted ? '🔇' : '🔊'}
 					</button>
-				)}
+					{buttonText && onButtonClick && (
+						<button
+							className="screen-toggle"
+							onClick={onButtonClick}
+						>
+							{buttonText}
+						</button>
+					)}
+				</div>
 			</div>
 		);
 	};
@@ -101,7 +122,6 @@ function App() {
 					<div className="games-screen">
 						<MiniGames
 							score={score}
-							onScoreChange={handleScoreChange}
 							onGame2048Select={() => setCurrentScreen('game2048')}
 							onSnakeSelect={() => setCurrentScreen('snake')}
 							onFlappyBirdSelect={() => setCurrentScreen('flappybird')}
@@ -151,6 +171,16 @@ function App() {
 						/>
 					</div>
 				);
+			case 'shop':
+				return (
+					<div className="shop-container">
+						<Shop
+							score={score}
+							onPurchase={(cost) => handleScoreChange(score - cost)}
+							onBack={() => setCurrentScreen('games')}
+						/>
+					</div>
+				);
 			default:
 				return null;
 		}
@@ -160,9 +190,17 @@ function App() {
 		<Layout>
 			<FloatingEmojis />
 			{renderHeader()}
-			{renderScreen()}
+			<ScreenTransition screenKey={currentScreen}>
+				{renderScreen()}
+			</ScreenTransition>
 		</Layout>
 	);
 }
 
-export default App;
+export default function AppWrapper() {
+	return (
+		<SoundProvider>
+			<App />
+		</SoundProvider>
+	);
+}

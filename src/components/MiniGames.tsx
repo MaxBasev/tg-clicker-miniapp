@@ -1,9 +1,10 @@
 import React from 'react';
 import '../styles/MiniGames.css';
+import { useHapticFeedback } from '../hooks/useHapticFeedback';
+import { useSound } from '../contexts/SoundContext';
 
 interface MiniGameProps {
 	score: number;
-	onScoreChange: (newScore: number) => void;
 	onGame2048Select: () => void;
 	onSnakeSelect: () => void;
 	onFlappyBirdSelect: () => void;
@@ -15,6 +16,15 @@ export const MiniGames: React.FC<MiniGameProps> = ({
 	onSnakeSelect,
 	onFlappyBirdSelect
 }) => {
+	const { impactOccurred } = useHapticFeedback();
+	const { playSound } = useSound();
+
+	const handleGameSelect = (action: () => void) => {
+		impactOccurred('light');
+		playSound('click');
+		action();
+	};
+
 	const games = [
 		{
 			id: '2048',
@@ -23,7 +33,7 @@ export const MiniGames: React.FC<MiniGameProps> = ({
 			reward: 0,
 			icon: '🧩',
 			description: 'Классическая головоломка',
-			action: onGame2048Select,
+			action: () => handleGameSelect(onGame2048Select),
 			color: '#FF6B6B'
 		},
 		{
@@ -33,7 +43,7 @@ export const MiniGames: React.FC<MiniGameProps> = ({
 			reward: 0,
 			icon: '🐍',
 			description: 'Собирай яблоки',
-			action: onSnakeSelect,
+			action: () => handleGameSelect(onSnakeSelect),
 			color: '#4CAF50'
 		},
 		{
@@ -43,7 +53,7 @@ export const MiniGames: React.FC<MiniGameProps> = ({
 			reward: 0,
 			icon: '🚀',
 			description: 'Преодолей все препятствия',
-			action: onFlappyBirdSelect,
+			action: () => handleGameSelect(onFlappyBirdSelect),
 			color: '#2196F3'
 		}
 	];
@@ -54,7 +64,7 @@ export const MiniGames: React.FC<MiniGameProps> = ({
 				{games.map((game) => (
 					<div
 						key={game.id}
-						className={`game-card ${score < game.price ? 'disabled' : ''}`}
+						className={`game - card ${score < game.price ? 'disabled' : ''} `}
 						onClick={game.action}
 						style={{
 							'--game-color': game.color
