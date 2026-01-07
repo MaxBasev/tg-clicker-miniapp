@@ -12,6 +12,8 @@ import { ScreenTransition } from './components/ScreenTransition';
 import { Leaderboard } from './components/Leaderboard';
 import { useLeaderboard } from './hooks/useLeaderboard';
 import { useHapticFeedback } from './hooks/useHapticFeedback';
+import { useDailyReward } from './hooks/useDailyReward';
+import { DailyRewardModal } from './components/DailyRewardModal';
 import './styles/App.css';
 
 type Screen = 'games' | 'game2048' | 'snake' | 'flappybird' | 'shop' | 'leaderboard';
@@ -115,6 +117,23 @@ function App() {
 
 	const { impactOccurred, notificationOccurred } = useHapticFeedback();
 
+	// Daily Reward
+	const { canClaim, claimReward, streak, nextReward } = useDailyReward();
+	const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
+
+	const handleClaimReward = () => {
+		const reward = claimReward();
+		if (reward > 0) {
+			handleScoreChange(score + reward);
+			impactOccurred('heavy');
+			playSound('success');
+			notificationOccurred('success');
+			// Don't close immediately, let them see the checkmark or animation? 
+			// For now close after short delay or let user close.
+			setTimeout(() => setIsRewardModalOpen(false), 1500);
+		}
+	};
+
 	// Theme Application Effect
 	useEffect(() => {
 		const activeTheme = shopItems.find(item => item.category === 'theme' && item.active);
@@ -212,9 +231,15 @@ function App() {
 				<h1>{title}</h1>
 				<div className="header-controls">
 					{currentScreen === 'games' && (
-						<button className="shop-button" onClick={() => setCurrentScreen('shop')}>
-							🛒
-						</button>
+						<>
+							<button className="shop-button" onClick={() => setCurrentScreen('shop')}>
+								🛒
+							</button>
+							<button className="daily-button" onClick={() => setIsRewardModalOpen(true)} style={{ marginLeft: 8 }}>
+								📅
+								{canClaim && <div className="notification-dot" />}
+							</button>
+						</>
 					)}
 					<button className="sound-toggle" onClick={toggleMute}>
 						{isMuted ? '🔇' : '🔊'}
@@ -322,6 +347,15 @@ function App() {
 			<ScreenTransition screenKey={currentScreen}>
 				{renderScreen()}
 			</ScreenTransition>
+
+			<DailyRewardModal
+				isOpen={isRewardModalOpen}
+				onClose={() => setIsRewardModalOpen(false)}
+				onClaim={handleClaimReward}
+				streak={streak}
+				canClaim={canClaim}
+				reward={nextReward}
+			/>
 		</Layout>
 	);
 }

@@ -1,0 +1,144 @@
+.daily-reward-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.daily-reward-modal {
+    background: var(--tg-theme-bg-color, #1a1a1a);
+    width: 90%;
+    max-width: 400px;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--tg-theme-text-color);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--tg-theme-hint-color);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.streak-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Make the last day item span full width or visually distinct */
+.streak-day:last-child {
+    grid-column: span 1;
+    /* Or span 4 for a big finish? Let's keep grid simple for now */
+}
+
+.streak-day {
+    background: var(--tg-theme-secondary-bg-color, rgba(255, 255, 255, 0.05));
+    border-radius: 12px;
+    padding: 10px 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+    opacity: 0.6;
+    transition: all 0.3s;
+}
+
+.streak-day.completed {
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid #4CAF50;
+    opacity: 1;
+}
+
+.streak-day.current {
+    background: rgba(33, 150, 243, 0.2);
+    border: 1px solid #2196F3;
+    transform: scale(1.05);
+    opacity: 1;
+    z-index: 10;
+    box-shadow: 0 0 15px rgba(33, 150, 243, 0.3);
+}
+
+.day-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--tg-theme-hint-color);
+}
+
+.coin-icon {
+    font-size: 20px;
+}
+
+.amount {
+    font-weight: bold;
+    font-size: 12px;
+    color: var(--tg-theme-text-color);
+}
+
+.check-mark {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+}
+
+.claim-btn {
+    background: var(--tg-theme-button-color, #2481cc);
+    color: var(--tg-theme-button-text-color, #fff);
+    border: none;
+    padding: 15px 40px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    transition: transform 0.2s;
+}
+
+.claim-btn:active {
+    transform: scale(0.95);
+}
+
+.claim-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--tg-theme-hint-color);
+}
