@@ -107,21 +107,15 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 			let newScore = score;
 			const newTiles = [...prevTiles].map(t => ({ ...t, isNew: false, isMerged: false }));
 
-			// Helper to get tile at position in the working set
-			const getTileAt = (tiles: Tile[], x: number, y: number) => tiles.find(t => t.x === x && t.y === y);
+			// Helper to get tile at position in the working set (unused)
+			// const getTileAt = (tiles: Tile[], x: number, y: number) => tiles.find(t => t.x === x && t.y === y);
 
 			// Vectors for iteration
-			const vectors = {
-				left: { x: 1, y: 0 },
-				right: { x: -1, y: 0 },
-				up: { x: 0, y: 1 },
-				down: { x: 0, y: -1 }
-			};
+			// const vectors = ... (unused)
 
-			const vector = vectors[direction];
 			const isHorizontal = direction === 'left' || direction === 'right';
 
-			// Traverse direction
+			// traverse direction vars
 			const traveralsX = [0, 1, 2, 3];
 			const traveralsY = [0, 1, 2, 3];
 
@@ -156,7 +150,7 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 					// Check next tile for merge
 					if (i < line.length - 1 && line[i + 1].value === tile.value) {
 						// Merge
-						const nextTile = line[i + 1];
+						// const nextTile = line[i + 1]; unused
 
 						// Update position of current tile (it moves to target)
 						// And position of next tile (it moves to target too)
