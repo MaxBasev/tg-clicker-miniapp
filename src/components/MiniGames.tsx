@@ -8,6 +8,7 @@ interface MiniGameProps {
 	onGame2048Select: () => void;
 	onSnakeSelect: () => void;
 	onFlappyBirdSelect: () => void;
+	onPlatformerSelect: () => void;
 	onLeaderboardSelect: () => void;
 }
 
@@ -16,6 +17,7 @@ export const MiniGames: React.FC<MiniGameProps> = ({
 	onGame2048Select,
 	onSnakeSelect,
 	onFlappyBirdSelect,
+	onPlatformerSelect,
 	onLeaderboardSelect
 }) => {
 	const { impactOccurred } = useHapticFeedback();
@@ -57,6 +59,16 @@ export const MiniGames: React.FC<MiniGameProps> = ({
 			description: 'Avoid obstacles',
 			action: () => handleGameSelect(onFlappyBirdSelect),
 			color: '#2196F3'
+		},
+		{
+			id: 'platformer',
+			name: 'Super Plumber',
+			price: 0,
+			reward: 0,
+			icon: '🍄',
+			description: 'Jump & Run',
+			action: () => handleGameSelect(onPlatformerSelect),
+			color: '#FF5722'
 		},
 		{
 			id: 'leaderboard',

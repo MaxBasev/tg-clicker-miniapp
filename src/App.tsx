@@ -14,9 +14,10 @@ import { useLeaderboard } from './hooks/useLeaderboard';
 import { useHapticFeedback } from './hooks/useHapticFeedback';
 import { useDailyReward } from './hooks/useDailyReward';
 import { DailyRewardModal } from './components/DailyRewardModal';
+import { Platformer } from './components/Platformer';
 import './styles/App.css';
 
-type Screen = 'games' | 'game2048' | 'snake' | 'flappybird' | 'shop' | 'leaderboard';
+type Screen = 'games' | 'game2048' | 'snake' | 'flappybird' | 'shop' | 'leaderboard' | 'platformer';
 
 // Вспомогательная функция для безопасного показа алертов
 const showAlert = (message: string) => {
@@ -88,7 +89,8 @@ function App() {
 			snake: 'Snake • Mini Games',
 			flappybird: 'Flappy Rocket • Mini Games',
 			shop: 'Shop • Mini Games',
-			leaderboard: 'Leaderboard • Mini Games'
+			leaderboard: 'Leaderboard • Mini Games',
+			platformer: 'Super Plumber • Mini Games'
 		};
 		document.title = titles[currentScreen];
 	}, [currentScreen]);
@@ -224,6 +226,11 @@ function App() {
 				buttonText = '🔙 Back';
 				onButtonClick = () => setCurrentScreen('games');
 				break;
+			case 'platformer':
+				title = 'Super Plumber';
+				buttonText = '🔙 Back';
+				onButtonClick = () => setCurrentScreen('games');
+				break;
 		}
 
 		return (
@@ -267,6 +274,7 @@ function App() {
 							onGame2048Select={() => setCurrentScreen('game2048')}
 							onSnakeSelect={() => setCurrentScreen('snake')}
 							onFlappyBirdSelect={() => setCurrentScreen('flappybird')}
+							onPlatformerSelect={() => setCurrentScreen('platformer')}
 							onLeaderboardSelect={() => setCurrentScreen('leaderboard')}
 						/>
 					</div>
@@ -333,6 +341,21 @@ function App() {
 				return (
 					<div className="leaderboard-container">
 						<Leaderboard onBack={() => setCurrentScreen('games')} />
+					</div>
+				);
+			case 'platformer':
+				return (
+					<div className="platformer-screen">
+						<Platformer
+							onGameOver={(gameScore) => {
+								// Cap reward or specific logic
+								const reward = Math.min(gameScore, 500);
+								handleScoreChange(score + reward);
+								// leaderboard? addScore('platformer', gameScore); // need to add platformer to leaderboard types first if desired
+								showAlert(`Level Complete!\nCoins collected: ${gameScore}`);
+							}}
+							onBack={() => setCurrentScreen('games')}
+						/>
 					</div>
 				);
 			default:

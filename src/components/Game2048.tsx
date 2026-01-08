@@ -306,8 +306,8 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 							className={`tile tile-${tile.value}`}
 							initial={tile.isNew ? { scale: 0 } : false}
 							animate={{
-								x: tile.x * 100 + tile.x * 10, // 100px size + 10px gap
-								y: tile.y * 100 + tile.y * 10,
+								x: `calc(${tile.x * 25}% + ${tile.x * 2.5}px)`,
+								y: `calc(${tile.y * 25}% + ${tile.y * 2.5}px)`,
 								scale: tile.isMerged ? [1, 1.2, 1] : 1
 							}}
 							transition={{
@@ -317,10 +317,10 @@ export const Game2048: React.FC<Game2048Props> = ({ onWin, onGameOver, onBack })
 							}}
 							style={{
 								position: 'absolute',
-								width: '100px',
-								height: '100px',
-								top: '10px',  // Offset for padding
-								left: '10px' // Offset for padding
+								width: 'calc(25% - 7.5px)',
+								height: 'calc(25% - 7.5px)',
+								top: '10px',  // Offset for container padding
+								left: '10px' // Offset for container padding
 							}}
 						>
 							<div className="tile-inner">{tile.value}</div>
